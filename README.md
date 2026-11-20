@@ -19,7 +19,7 @@ It is a dashboard you glance at, not a to-do list you process. Tick something of
 dealt with it — or when you have decided you do not care — and it stops competing for your
 attention until the next event.
 
-![PJSK Last Call showing the EN and JP columns side by side](docs/screenshot.png)
+![PJSK Last Call showing the EN, JP and CN columns side by side](docs/screenshot.png)
 
 ## Using it
 
@@ -42,7 +42,8 @@ to Home screen, which gives you a one-tap shortcut.
 
 On first run it asks which server you play, offers a preset for how much detail you want, lets you
 set the theme and density, and shows what the initial download costs. Nothing is fetched before you
-answer.
+answer. If you don't spend money on the game, it recommends the Free-to-play preset. You can open it
+again any time from Settings → Testing & setup.
 
 ![The first-run setup wizard](docs/wizard.png)
 
@@ -56,17 +57,23 @@ For your current event on each selected server:
   8–10 days later than most people assume.
 - **Last virtual show** — the easiest thing to miss. Shows run as a roughly one-day burst, not for
   the whole event.
+- **Stamp missions and shops** — collaboration and anniversary stamp missions, page by page, and
+  limited-time exchange shops before they close.
 - **Event gacha** and every concurrent banner, folded away by default.
-- **Extras** — the monthly mission pass, both buying it and finishing it, your first three ranked
-  matches of the season, and the CN weekly badge exchange.
+- **Extras** — the monthly mission pass (buying it, finishing it, and a progress advisor), your
+  first three ranked matches of the season, the CN weekly badge exchange, and paid Connect Live
+  concerts.
 
-Every row can be switched off in Settings, and presets set them in one click: **Everything**,
-**Crystals only** (hides the gacha rows), or **Free-to-play** (hides the paid mission pass).
-Presets combine, and you can save up to three of your own.
+Every row can be switched off in Settings, and presets set them in one click: **Show everything**,
+**Hide all gachas**, or **Free-to-play** (hides everything that needs real money). Presets combine,
+and you can save up to three of your own.
 
 ## Setting it up
 
-Everything below can be changed later from **⚙ Settings** — nothing here is permanent.
+Everything below can be changed later from **⚙ Settings** — nothing here is permanent. Settings is
+split into four folding sections (Basics, What's shown, Time & data, Testing & setup), the **?**
+buttons explain each part, and it remembers which sections you left open. On a wide screen the
+sections sit in two columns.
 
 **Servers.** Pick one to start. Each one you add is a separate column that loads independently, so
 a server having a bad day never blanks the others. Columns fit as many across as your window
@@ -76,10 +83,13 @@ the same slim width three would use.
 **Row presets.** These decide how much is on screen. The default shows everything; the **?** next
 to the heading explains exactly what each preset hides.
 
-- **Restore defaults** — everything visible.
-- **Crystals only** — hides the two gacha rows, which are about *spending* crystals rather than
-  collecting them. Virtual shows stay, because they pay out crystals or wish pieces either way.
-- **Free-to-play** — hides the two mission-pass rows, which assume you bought the pass.
+- **Show everything** — every row visible, the default.
+- **Hide all gachas** — hides the event gacha and the other-gachas list, which are about *spending*
+  crystals rather than collecting them. Virtual shows stay, because they pay out crystals or wish
+  pieces either way.
+- **Free-to-play** — hides everything that needs real money: the two mission-pass rows, paid
+  Connect Live shows, banners that take only paid crystals or need Colorful+, and the Colorful+
+  options in the mission-pass advisor. Recommended if you don't spend money on the game.
 
 They combine, and every individual row stays switchable afterwards.
 
@@ -88,12 +98,22 @@ from scratch rather than lightened, because the urgency colours stop working on 
 
 **Density.** *Compact* is the default and fits noticeably more within the same screen real estate;
 *Comfortable* is roomier if you prefer the space. Compact is not just tighter spacing — it drops
-the server-time line, folds the event sub-tasks into a single row of chips, and shortens countdowns
-to the precision that still matters: seconds under a day, hours under three, days beyond that.
+the server-time line and folds the event sub-tasks into a single row of chips.
 
 **Server time.** Shows each server's own local clock beside your own, which is useful for
 double-checking a deadline against what the game itself displays. **Requires Comfortable density** —
 compact hides it to save width, and says so when you look for the setting.
+
+**Dates.** Shown in English by default. Settings can switch them to your system's own format, and
+the Clock setting picks 12- or 24-hour.
+
+**Artwork.** Comfortable view can show each event's banner and the gacha banners, loaded from the
+community-run [sekai.best](https://sekai.best) asset mirror. You are asked when you switch to it.
+Compact stays text-only, so it doubles as a data saver.
+
+**Time travel.** Under *Testing & setup* in Settings. It shows the page as it would look at another
+date and time, which is handy for checking what a deadline will look like before it arrives.
+Nothing you tick while it is open is saved.
 
 **Data.** A refresh is a few hundred kilobytes. Gacha timing is the only large download, and it
 only happens when you ask, after a prompt telling you the exact current size. You can raise the
@@ -101,9 +121,35 @@ threshold or turn the prompt off entirely.
 
 ## Reading the screen
 
-Countdowns tick live. Anything within **three days** gets a coloured chip — red under a day, orange
+Countdowns tick live, at the precision that still matters: seconds under a day, hours under three
+days, days beyond that. Anything within **three days** gets a coloured chip — red under a day, orange
 under three — and everything further out stays quiet grey text. The chip is the signal: if you see
 one, something needs attention soon.
+
+The badge beside each event says where it stands: **live** while the event runs, **wrapping up**
+once it has ended but something is still open (usually the item exchange), and **ended** when
+nothing is left. Before an event it counts server days ("starts next server day"), since the game's
+day rolls over at 04:00 server time, not at your midnight.
+
+**Stamp missions and shops.** Collaboration and anniversary stamp missions get their own block,
+with a countdown and a button per page to tick it off, along with limited-time exchange shops and
+their closing dates.
+
+**Mission pass.** Under Extras, drag the slider to your live mission points and the tool says
+whether you are ahead (and when you would finish), on track, or need to catch up (and by how much a
+day). "What if I buy Colorful+ now?" shows the same with double points from today (Free-to-play
+hides the Colorful+ parts). Paid Connect Live concerts are listed there too: a countdown to the
+first show, "ongoing" while one is on, then the time to the next or last rerun.
+
+**No full pity saved?** Tick "I don't have the equivalent of 90,000 crystals saved" in the gacha
+section (exchange tickets count) and the banners that take free crystals move into a separate,
+folded list, with a short reminder about the hard pity before it opens. What stays in the main list
+is labelled "Free & paid-only gachas": the banners that never touch your free crystals.
+
+**Calendar.** Each deadline has a **+cal** link that opens a pre-filled Google Calendar entry you
+can edit before saving. **Export to calendar** at the bottom of a column puts several at once into
+one file for Google Calendar, Apple Calendar or Outlook. You pick the entries, rename them if you
+like, and choose the reminders.
 
 Tick a row when you have dealt with it, or when you have decided you do not care. It greys out and
 stops competing for attention. Check-offs are keyed to the specific event, season or month, so they

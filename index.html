@@ -120,21 +120,91 @@
   .mfacts .dim{color:var(--faint);font-size:.92em}
   .mhint{font-size:.78rem !important;color:var(--faint) !important}
   .mwarn{margin-bottom:14px}
-  .mbtns{display:flex;gap:8px;justify-content:flex-end}
+  .mbtns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
   .mbtns .myes{border-color:var(--cyan);color:var(--cyan);font-weight:700}
   .thresh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.84rem;color:var(--muted)}
   .thresh input[type=number]{width:88px;background:var(--surface);color:var(--text);
     border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;font-size:.84rem}
   .rowcost{color:var(--faint);font-size:.92em;margin-left:auto;white-space:nowrap}
-  .presethelp{appearance:none;border:1px solid var(--line);background:var(--surface);
+  .presethelp,.qhelp{appearance:none;border:1px solid var(--line);background:var(--surface);
     color:var(--muted);cursor:pointer;font:inherit;font-size:.72rem;font-weight:700;
     width:19px;height:19px;line-height:1;border-radius:50%;margin-left:7px;padding:0;
-    vertical-align:1px;text-transform:none}
-  .presethelp:hover{color:var(--cyan);border-color:var(--cyan)}
+    vertical-align:1px;text-transform:none;flex:none}
+  .presethelp:hover,.qhelp:hover{color:var(--cyan);border-color:var(--cyan)}
+  /* settings sections (V36). Narrow: one stack in reading order. Wide: "What's shown" gets its own
+     column; the wrappers are display:contents below the breakpoint so `order` can interleave them. */
+  .setpanel{display:flex;flex-direction:column;gap:10px;padding:10px}
+  .setcol{display:contents}
+  .setsec[data-sec="basics"]{order:1} .setsec[data-sec="shown"]{order:2}
+  .setsec[data-sec="time"]{order:3} .setsec[data-sec="testing"]{order:4}
+  @media (min-width:860px){
+    .setpanel{flex-direction:row;align-items:flex-start}
+    .setcol{display:flex;flex-direction:column;gap:10px;flex:1 1 0;min-width:0}
+  }
+  .setsec{border:1px solid var(--line);border-radius:10px;padding:0 14px}
+  .setsec>summary,.setsub>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;user-select:none}
+  .setsec>summary::-webkit-details-marker,.setsub>summary::-webkit-details-marker{display:none}
+  .setsec>summary::before,.setsub>summary::before{content:'▸';color:var(--faint);font-size:.8em;width:.8em;flex:none}
+  .setsec[open]>summary::before,.setsub[open]>summary::before{content:'▾'}
+  .setsec>summary{padding:11px 0;font-size:.9rem;font-weight:700;color:var(--text)}
+  .setsec>summary:hover{color:var(--cyan)}
+  .secsum{margin-left:auto;font-size:.74rem;font-weight:400;color:var(--faint);min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .setsec[open]>summary .secsum{display:none}
+  .secbody{padding:2px 0 14px}
+  .setsub{margin-top:14px;border-top:1px solid var(--line);padding-top:4px}
+  .setsub>summary{padding:8px 0;font-size:.82rem;font-weight:700;color:var(--muted)}
+  .setsub .rowpick{margin-top:6px}
+  /* only the tag is coloured: a coloured border read as "already selected" (V37) */
+  .recb{margin-left:7px;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ok)}
+  .frgo{margin-top:18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .gsafe{padding:5px 9px 3px;font-size:.74rem}
   .helpbox{max-width:520px;max-height:80vh;overflow:auto}
+  .icsbox{max-width:560px;max-height:88vh;overflow:auto}
+  .icsg{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);font-weight:700;margin:14px 0 2px}
+  .icsrow{display:flex;align-items:flex-start;gap:9px;padding:6px 0;border-top:1px solid var(--line)}
+  .icsck{flex:none;width:15px;height:15px;margin:7px 0 0;accent-color:var(--cyan);cursor:pointer}
+  .icsmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .icst{width:100%;background:var(--surface);color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:6px 8px;font:inherit;font-size:.8rem}
+  .icsrow.off .icst{opacity:.45}
+  .icsw{font-size:.72rem;color:var(--faint);cursor:pointer}
+  .icsopt{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;margin-top:14px;font-size:.8rem;color:var(--muted)}
+  .icsopt .seg button{padding:6px 11px;font-size:.78rem}
+  .icsalarms{display:flex;gap:5px;flex-wrap:wrap}
+  .icscustom{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .cchip{display:inline-flex}
+  .cchip .ichip{border-top-right-radius:0;border-bottom-right-radius:0}
+  .ichipx{appearance:none;border:1px solid var(--line);border-left:0;background:var(--surface);color:var(--faint);
+    cursor:pointer;font:inherit;font-size:.9rem;line-height:1;padding:0 8px;border-radius:0 7px 7px 0}
+  .ichipx:hover{color:var(--urgent);background:var(--surface2)}
+  /* ---- time-travel bar ---- */
+  .ttbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--stage);border-top:2px solid var(--warn);
+    padding:9px 14px calc(9px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:7px;font-size:.8rem}
+  .ttrow{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;max-width:1240px;width:100%;margin:0 auto}
+  .ttrow b{color:var(--warn)}
+  .ttnow{font-weight:700}
+  .ttoff,.ttnote,.ttedge{color:var(--faint);font-size:.74rem}
+  .ttslider{flex:1 1 200px;min-width:0;accent-color:var(--warn)}
+  .ttbar select{width:auto;max-width:100%;flex:1 1 200px;font-weight:400;font-size:.78rem;padding:4px 7px}
+  .ttbar input[type=datetime-local]{background:var(--surface);color:var(--text);border:1px solid var(--line);
+    border-radius:7px;padding:4px 7px;font:inherit;font-size:.78rem}
+  .ttexit{margin-left:auto}
+  .ttx{font-size:1rem;line-height:1;padding:3px 9px}
+  body.tt-on{padding-bottom:150px}
+  @media (max-width:700px){ body.tt-on{padding-bottom:270px} }
+  .icscustom .icsnum{width:64px;background:var(--surface);color:var(--text);border:1px solid var(--line);
+    border-radius:7px;padding:4px 7px;font:inherit;font-size:.78rem}
+  .icscustom select{width:auto;font-weight:400;font-size:.78rem;padding:4px 7px}
+  .ichip{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--muted);
+    font:inherit;font-size:.76rem;padding:4px 10px;border-radius:7px;cursor:pointer}
+  .ichip[aria-pressed="true"]{border-color:var(--cyan);color:var(--cyan);font-weight:700}
+  .icsbox details.dt{margin:10px 0 12px}
+  .icsraw{min-height:170px;margin-top:6px;font-size:.7rem}
+  .icsdone{color:var(--ok) !important}
   .helpbox .mfacts{margin-bottom:12px}
   .helpbox .mfacts li{margin-bottom:3px}
-  @media (pointer: coarse){ .presethelp{width:30px;height:30px;font-size:.85rem} }
+  @media (pointer: coarse){ .presethelp,.qhelp{width:30px;height:30px;font-size:.85rem} }
   .presetrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px}
   .preset.on{border-color:var(--cyan);color:var(--cyan);font-weight:700}
   .cpreset{display:inline-flex;align-items:center}
@@ -147,13 +217,20 @@
   .presetsave input{flex:1;min-width:150px;background:var(--surface);color:var(--text);
     border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:inherit;font-size:.84rem}
   .presetsave input:disabled{opacity:.5}
-  .tchips{display:flex;flex-wrap:wrap;gap:5px;margin:3px 0 1px 22px}
+  /* One equal column per chip, always on one row. A wrapping flex row put two chips on top and
+     stretched the third across the whole width underneath on a slim column; here the text wraps
+     inside the chip instead, and a muted task simply leaves two columns rather than a hole. */
+  .tchips{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:5px;margin:3px 0 1px 22px}
+  /* One label per chip, in the original chip type, allowed onto a second line when the column is
+     slim. hyphens:auto (the page is lang="en") breaks a long word with a "-" instead of leaving
+     the line half empty; overflow-wrap is the fallback where no hyphenation dictionary exists. */
   .tchip{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--text);
-    font:inherit;font-size:.72rem;padding:3px 9px;border-radius:7px;cursor:pointer;line-height:1.4}
+    font:inherit;font-size:.72rem;padding:3px 9px;border-radius:7px;cursor:pointer;line-height:1.4;
+    text-align:center;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
   .tchip:hover{border-color:var(--faint);background:var(--surface2)}
   .tchip.done{color:var(--far);text-decoration:line-through;text-decoration-color:var(--line);
     background:transparent;border-color:var(--line)}
-  @media (pointer: coarse){ .tchip{min-height:36px;padding:6px 12px} }
+  @media (pointer: coarse){ .tchip{min-height:36px;padding:6px 12px} .ichip{min-height:36px} .icsck{width:22px;height:22px} .mpslider{height:30px} }
   .rowpick{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
   .rowgrph{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);
     font-weight:700;margin-bottom:5px}
@@ -203,13 +280,21 @@
   .srvopt{--accent:var(--accent-d)}
   .col-body{padding:var(--pad-col)}
 
-  .ch{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-  .ch .epick{flex:1 1 130px;width:auto;min-width:0}
+  /* one row, always: the event name gives way (the full name is in the open dropdown), so a long
+     name can no longer push the status badge onto a second line */
+  .ch{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:nowrap}
+  .ch .epick{flex:1 1 0;width:auto;min-width:0;text-overflow:ellipsis}
+  .ch b,.ch .cdot{flex:none}
   .ch .cdot{width:10px;height:10px;border-radius:50%;background:var(--accent,var(--cyan))}
   .ch b{font-size:1.05rem;letter-spacing:.02em}
-  .ch .cstatus{margin-left:auto;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:3px 8px;border-radius:6px}
+  .ch .cstatus{flex:none;white-space:nowrap;margin-left:auto;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:3px 8px;border-radius:6px}
   .cstatus.live{background:color-mix(in srgb, var(--ok) 15%, transparent);color:var(--ok)}
-  .cstatus.soon{background:color-mix(in srgb, var(--soon) 15%, transparent);color:var(--soon)}
+  /* the "starts ..." wordings name the server day outright, which is too long for one line in a
+     slim column -- so this badge alone may break into two lines INSIDE itself. Two lines of .66rem
+     are still shorter than the picker beside it, so the title row does not grow. */
+  .cstatus.soon{background:color-mix(in srgb, var(--soon) 15%, transparent);color:var(--soon);
+    white-space:normal;max-width:10.5em;text-align:center;line-height:1.25}
+  .cstatus.wrap{background:color-mix(in srgb, var(--caution) 15%, transparent);color:var(--caution)}
   .cstatus.past{background:color-mix(in srgb, var(--muted) 13%, transparent);color:var(--muted)}
 
   select{width:100%;background:var(--surface);color:var(--text);border:1px solid var(--line);
@@ -262,6 +347,9 @@
   .cachebtns{display:flex;gap:6px}
   .cacheline .stale{color:var(--urgent);font-weight:600}
   .btn.xs{padding:3px 9px;font-size:.7rem;border-radius:7px;line-height:1.3}
+  /* the refresh buttons carry the age themselves, so they read like the old staleness text --
+     muted and unbolded -- until stale, when they turn red and bold */
+  .cachebtns .btn{color:var(--faint);font-weight:400;font-size:.71rem;padding:4px 10px}
   .cachebtns .btn.stale{color:var(--urgent);border-color:var(--urgent);font-weight:700}
   .cacheline .srvclock{color:var(--muted);white-space:nowrap}
   .vh{flex-wrap:wrap}
@@ -312,6 +400,9 @@
   .grow .gn{color:var(--text);line-height:1.32;word-break:break-word;min-width:0}
   /* countdown and +cal travel together and never split across lines; only the name wraps */
   .gmeta{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto;white-space:nowrap}
+  /* V35: once the name would take more than three lines beside the countdown, the countdown and
+     +cal move to their own line instead (fitGachaRows decides, per row, from the real layout) */
+  .grow.stack .gchklab{flex-basis:100%}
   .grow .cd{flex:none}
   .grow.done .gn{color:var(--far);text-decoration:line-through;text-decoration-color:var(--line)}
   .grow .cal{flex:none;font-size:.62rem;color:var(--faint);cursor:pointer;text-transform:uppercase}
@@ -331,13 +422,56 @@
   @keyframes sp{to{transform:rotate(360deg)}}
   @media(prefers-reduced-motion:reduce){.spin{animation:none}}
 
-  .out{margin-top:18px;display:none}
-  .out.show{display:block}
-  .out h4{margin:0 0 6px;font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--faint)}
   textarea{width:100%;min-height:140px;background:var(--inset);border:1px solid var(--line);border-radius:10px;
     color:var(--text);padding:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem;resize:vertical}
   .note{font-size:.78rem;color:var(--faint);margin-top:8px;line-height:1.45}
   a{color:var(--cyan)}
+
+  /* ---- V34 ---- */
+  .livehint{display:flex;align-items:center;gap:5px 10px;flex-wrap:wrap;margin:0 0 9px;padding:7px 10px;
+    border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:9px;font-size:.76rem;color:var(--muted)}
+  .livehint b{color:var(--text)}
+  .livehint .hintgo{margin-left:auto}
+  .livehint .why{flex-basis:100%;color:var(--faint);font-size:.72rem;line-height:1.4}
+  .rung.skipped .rlabel,.rung.skipped .rt{color:var(--far)}
+  .rnote.skipnote{font-style:italic}
+  .nceil{margin:7px 0 2px;font-size:.76rem}
+  .nceilnote{font-size:.72rem;color:var(--warn);margin:2px 0 0 24px}
+  details.dt.gamble summary{color:var(--muted)}
+  details.dt.gamble summary .cd{font-size:.76rem;font-weight:400}
+  .mpadv{padding:7px 0 4px;border-top:1px solid var(--line);margin-top:4px}
+  .mphead{display:flex;align-items:baseline;gap:8px;font-size:.8rem}
+  .mphead .mpval{margin-left:auto;font-size:.74rem;color:var(--muted);white-space:nowrap}
+  .mpslider{width:100%;accent-color:var(--cyan);margin:6px 0 2px}
+  .mpcp{font-size:.76rem}
+  .mpverdict{font-size:.77rem;line-height:1.45;color:var(--muted);margin-top:5px}
+  .mpverdict b{color:var(--text)}
+  .mpverdict.ahead b,.mpverdict.done b{color:var(--ok)}
+  .mpverdict.track b{color:var(--soon)}
+  .mpverdict.behind b{color:var(--warn)}
+  .mpasof{font-size:.7rem;color:var(--faint);margin-top:2px}
+  .mpwhat{margin-top:6px}
+  .mpwhat[aria-pressed="true"]{border-color:var(--cyan);color:var(--cyan)}
+  .mpwif{margin-top:4px}
+  .pmc{padding:6px 0 3px;border-top:1px solid var(--line)}
+  .spsect .vh + .pmc{border-top:none}
+  .pmh{display:flex;align-items:baseline;gap:8px;font-size:.8rem;font-weight:600}
+  .pmh .pmn{min-width:0}
+  /* stamp pages: as many chips per row as fit (at least ~84px each), wrapping to more rows */
+  .tchips.pmchips{grid-auto-flow:row;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));margin:4px 0 2px}
+  details.dt.sub .pmchips{margin-left:0}
+  .pmh .cd{margin-left:auto}
+  .citem .inote{display:block;font-size:.7rem;color:var(--faint);font-weight:400}
+  /* artwork: Comfortable only, opt-in, loaded straight from the sekai.best mirror */
+  .evart{display:block;width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin:0 0 9px}
+  .gart{display:block;width:100%;max-width:260px;border-radius:8px;margin:5px 0 2px}
+  /* a fixed box (the banners are 488x208), so the row does not reflow when the image arrives */
+  .gthumb{flex:none;height:26px;width:61px;object-fit:cover;border-radius:5px}
+  /* the enlarged banner shown after hovering a thumbnail for a moment (mouse only) */
+  .gpop{position:fixed;z-index:60;pointer-events:none;padding:4px;background:var(--stage);
+    border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px color-mix(in srgb, var(--bg) 70%, transparent)}
+  .gpop img{display:block;width:100%;border-radius:7px}
+  .artbox .mfacts{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -355,11 +489,7 @@
 
     <div class="cols" id="cols"></div>
 
-    <div class="out" id="out">
-      <h4 id="outTitle"></h4>
-      <textarea id="outArea" readonly></textarea>
-      <div class="note" id="outNote"></div>
-    </div>
+    <div id="tt" hidden></div>
   </div>
 
   <div id="footLinks"></div>
@@ -369,7 +499,9 @@
     feat. Hatsune Miku</i> and all related names, characters, and assets are trademarks of their
     respective owners. This tool displays scheduling data fetched at runtime from the
     community-maintained <a href="https://github.com/Sekai-World" target="_blank" rel="noopener">Sekai-World</a>
-    master-database mirrors; it does not redistribute game data or assets.
+    master-database mirrors; it does not redistribute game data or assets. Only if you switch on
+    artwork in Comfortable view does it show event and gacha banners, loaded directly from the
+    community-run <a href="https://sekai.best" target="_blank" rel="noopener">sekai.best</a> asset mirror.
   </footer>
 
 <script>
@@ -379,13 +511,16 @@
 const SERVERS = {
   EN:{ id:'EN', label:'EN', name:'Global (English)',  repo:'sekai-master-db-en-diff',
        tz:'America/Los_Angeles', tzLabel:'PT',  hour12:true,  accent:'#4a9eff', accentLight:'#1f6fd0',
-       est:{core:278633, vlives:433423, gachas:2927977}, quirks:{} },
+       est:{core:279756, vlives:433423, gachas:2927977, specials:127443, lmissions:176156},
+       assets:'sekai-en-assets', quirks:{} },
   JP:{ id:'JP', label:'JP', name:'Japan',             repo:'sekai-master-db-diff',
        tz:'Asia/Tokyo',          tzLabel:'JST', hour12:false, accent:'#ff5c8a', accentLight:'#d12a63',
-       est:{core:345059, vlives:666753, gachas:3539027}, quirks:{} },
+       est:{core:346275, vlives:666753, gachas:3539027, specials:153072, lmissions:236683},
+       assets:'sekai-jp-assets', quirks:{} },
   CN:{ id:'CN', label:'CN', name:'Mainland China',    repo:'sekai-master-db-cn-diff',
        tz:'Asia/Shanghai',       tzLabel:'CST', hour12:false, accent:'#ffce3f', accentLight:'#9a6c05',
-       est:{core:182844, vlives:194794, gachas:329574},
+       est:{core:183344, vlives:194794, gachas:329574, specials:98481, lmissions:53313},
+       assets:'sekai-cn-assets',
        quirks:{ weeklyBadge:{ label:'闪耀徽章 weekly exchange', weekday:'Mon', hour:4 } } },
 };
 const SERVER_IDS = Object.keys(SERVERS);
@@ -397,18 +532,38 @@ const SRV_LBL = Object.fromEntries(SERVER_IDS.map(s=>[s,SERVERS[s].tzLabel]));
    language is a separate axis; dispLocale() is the one place to change that if a future locale
    should also drive date display. hour12 is a user preference, defaulting per server so the
    readout matches what that game client shows. */
-const dispLocale = () => undefined;
+/* V32: English by default, so the English interface reads as English everywhere ("Sep 19, 04:59",
+   not "9月19日 04:59"). Following the system locale is a checkbox in Settings. */
+const dispLocale = () => PREFS.dateFmt==='system' ? undefined : 'en-US';
+/* hourCycle, never hour12:false -- in en-US, some browsers resolve hour12:false to h24 and print
+   midnight as "24:05". Your own times follow the Clock setting, and on Auto your system's own 12/24 habit, so
+   English month names do not drag a 24-hour user onto AM/PM. */
+const hc = h12 => h12 ? 'h12' : 'h23';
+let _sysH12;
+function localHour12(){
+  if(PREFS.hour12==='12') return true;
+  if(PREFS.hour12==='24') return false;
+  if(_sysH12===undefined){ try{ _sysH12 = !!new Intl.DateTimeFormat(undefined,{hour:'numeric'}).resolvedOptions().hour12; }catch{ _sysH12=false; } }
+  return _sysH12;
+}
 function srvHour12(s){ return PREFS.hour12==='12' ? true : PREFS.hour12==='24' ? false : SERVERS[s].hour12; }
 const cache = {};
 let showSrv = true;
 const $ = id => document.getElementById(id);
-const now = () => Date.now();
+/* V33: every clock read in the tool goes through now(), so one offset moves the whole page
+   through time. That is what the time-travel bar drives. realNow() is for stamps that get
+   PERSISTED (when data was downloaded): a simulated time must never be written to storage. */
+let TIME_SHIFT = 0;
+/* non-null while the time-travel sandbox is open; holds the real check-offs to put back */
+let SIM = null;
+const realNow = () => Date.now();
+const now = () => Date.now() + TIME_SHIFT;
 const p2 = n => String(n).padStart(2,'0');
 const etypeName = k => STRINGS.en['etype.'+k]!==undefined ? t('etype.'+k) : (k||'').replace(/_/g,' ');
 
-function fmtLocal(ts){ return new Date(ts).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function fmtLocal(ts){ return new Date(ts).toLocaleString(dispLocale(),{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:hc(localHour12())}); }
 function fmtSrv(ts, srv){
-  const s = new Date(ts).toLocaleString(dispLocale(),{timeZone:SRV_TZ[srv],month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:srvHour12(srv)});
+  const s = new Date(ts).toLocaleString(dispLocale(),{timeZone:SRV_TZ[srv],month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:hc(srvHour12(srv))});
   return `${SRV_LBL[srv]} ${s}`;
 }
 function hms(ms){ if(ms<0)ms=0; const h=Math.floor(ms/3600000); ms-=h*3600000; const m=Math.floor(ms/60000); ms-=m*60000; return `${p2(h)}:${p2(m)}:${p2(Math.floor(ms/1000))}`; }
@@ -421,11 +576,22 @@ const STORE = {
   set(s,v){ try{ localStorage.setItem(SKEY(s), JSON.stringify(v)); return true; }catch{ return false; } },
   del(s){ try{ localStorage.removeItem(SKEY(s)); }catch{} }
 };
+/* V34 changed what the slimmed tables keep: event artwork names, Connect Live shows, the
+   mission-pass month. A cache from before that is refetched once -- events and virtual lives are a
+   few hundred KB together. Gacha timing (several MB) is kept as it is; the one feature that needs
+   its new field says so and points at the gacha refresh button. */
+const CACHE_FMT = 2;
 function persist(s){ const c=cache[s]; if(!c) return;
-  STORE.set(s,{events:c.events,exchange:c.exchange,eventCards:c.eventCards,episodes:c.episodes,seasons:c.seasons,vlives:c.vlives,gachas:c.gachas,fetchedAt:c.fetchedAt||{},sizes:c.sizes||{}}); }
+  STORE.set(s,{fmt:CACHE_FMT,events:c.events,exchange:c.exchange,eventCards:c.eventCards,episodes:c.episodes,seasons:c.seasons,
+    lmp:c.lmp||[],lmMax:c.lmMax||{},pm:c.pm||null,mx:c.mx||null,
+    vlives:c.vlives,gachas:c.gachas,fetchedAt:c.fetchedAt||{},sizes:c.sizes||{}}); }
 function hydrate(s){ const d=STORE.get(s);
-  if(d&&d.events){ cache[s]={events:d.events,exchange:d.exchange||{},eventCards:d.eventCards||{},episodes:d.episodes||{},seasons:d.seasons||[],vlives:d.vlives||null,gachas:d.gachas||null,fetchedAt:d.fetchedAt||{},sizes:d.sizes||{}}; return true; }
-  return false; }
+  if(!d || !(d.events || d.gachas)) return false;
+  cache[s]={events:d.events||null,exchange:d.exchange||{},eventCards:d.eventCards||{},episodes:d.episodes||{},seasons:d.seasons||[],
+    lmp:d.lmp||[],lmMax:d.lmMax||{},pm:d.pm||null,mx:d.mx||null,
+    vlives:d.vlives||null,gachas:d.gachas||null,fetchedAt:d.fetchedAt||{},sizes:d.sizes||{}};
+  if(d.fmt!==CACHE_FMT){ cache[s].events=null; cache[s].vlives=null; cache[s].pm=null; cache[s].mx=null; }
+  return true; }
 
 /* ---------- user settings: the third namespace, deliberately separate from data + check-offs ----------
    `servers:null` means "never chosen" and is what triggers the first-run picker. */
@@ -438,23 +604,29 @@ const PREFS_KEY='pjsk_prefs_v1';
 const ROW_TYPES = [
   ['Deadlines',   ['aggregate','gacha','exchange','vshow']],
   ['Event tasks', ['episodes','combo10','finalreward']],
-  ['Extras',      ['pass','passdone','rank','badge']],
-  ['Gachas',      ['othergachas']],
+  ['Campaigns',   ['stamps','mexchange']],
+  ['Extras',      ['pass','passdone','mpadv','cplus','rank','badge','clive']],
+  ['Gachas',      ['othergachas','paidgachas']],
   ['Export',      ['cal','ics']],
 ];
 const DEFAULT_ROWS = Object.fromEntries(ROW_TYPES.flatMap(([,ks])=>ks.map(k=>[k,true])));
 
 /* Presets are starting points, not modes. Each is a patch applied over whatever is currently set,
-   so "Crystals only" and "Free-to-play" combine rather than overriding each other — a user can
-   easily be both. "Everything" is the one that resets, since that is what it means.
+   so "Hide all gachas" and "Free-to-play" combine rather than overriding each other — a user can
+   easily be both. "Show everything" is the one that resets, since that is what it means.
+   (The ids are the V2x ones; only the labels changed in V36.)
 
-   Virtual shows deliberately stay visible under Crystals only: a virtual live rewards either
+   Virtual shows deliberately stay visible under Hide all gachas: a virtual live rewards either
    crystals or wish pieces, both worth collecting, so there is nothing to filter and no need to
-   resolve per-show reward types. */
+   resolve per-show reward types.
+
+   Free-to-play hides everything that needs real money: the pass, a Connect Live ticket, banners
+   that take only paid crystals or a Colorful+ subscription, and the Colorful+ options in the
+   mission-pass advisor (V36 added the last two). */
 const PRESETS = {
   everything: {},                                    // {} means "reset everything on"
   crystals:   { gacha:false, othergachas:false },    // gachas are spending-side, not acquisition
-  f2p:        { pass:false, passdone:false },        // both mission-pass rows assume a purchase
+  f2p:        { pass:false, passdone:false, clive:false, paidgachas:false, cplus:false },
 };
 const MAX_CUSTOM = 3;
 function applyPreset(id){
@@ -469,9 +641,11 @@ function applyPreset(id){
   savePrefs();
   return true;
 }
-function presetButtonsHtml(){
+/* `rec` marks one built-in preset as the recommended pick (the first-run setup recommends f2p) */
+function presetButtonsHtml(rec){
   const built = Object.keys(PRESETS).map(id=>
-    `<button type="button" class="btn sm preset" data-preset="${id}">${t('preset.'+id)}</button>`).join('');
+    `<button type="button" class="btn sm preset${id===rec?' rec':''}" data-preset="${id}">${t('preset.'+id)}${
+      id===rec?`<span class="recb">${t('preset.rec')}</span>`:''}</button>`).join('');
   const custom = (PREFS.customPresets||[]).map(c=>
     `<span class="cpreset"><button type="button" class="btn sm preset" data-preset="${esc(c.name)}">${esc(c.name)}</button>` +
     `<button type="button" class="cpdel" data-del="${esc(c.name)}" aria-label="${t('preset.delete')}">×</button></span>`).join('');
@@ -492,7 +666,7 @@ const STRINGS = {
     'fr.intro':'PJSK Last Call shows you what is about to close on your server — virtual shows, the item exchange, event deadlines — so the free crystals attached to them don\'t quietly expire. Pick one to start; you can add more, or change this later in Settings.',
     'fr.dataHead':'Data use',
     'fr.lookHead':'Appearance',
-    'fr.densityHint':'Compact is the default and fits noticeably more on screen. Comfortable is roomier, and is the only one that can show server times.',
+    'fr.densityHint':'Compact is the default and fits noticeably more on screen; it is text only, so it also saves data. Comfortable is roomier, is the only one that can show server times, and shows event and gacha artwork loaded from sekai.best.',
     'fr.sizePrompt':'Pick a server to see what the first load costs.',
     'fr.sizeDesc':'The first load fetches event, exchange, story and ranked data plus virtual-show schedules — about <b>{core}</b> for {servers}, compressed. Gacha timing is separate and only downloads if you ask for it (about {gacha}). You can turn either off later in Settings.',
     'fr.start':'Start',
@@ -509,8 +683,17 @@ const STRINGS = {
     'set.theme':'Theme',
     'set.light':'Light', 'set.dark':'Dark', 'set.system':'Follow system',
     'set.density':'Density',
-    'set.comfortable':'Comfortable', 'set.compact':'Compact',
-    'set.clock':'Clock', 'set.clockAuto':'Match server', 'set.clock12':'12-hour', 'set.clock24':'24-hour',
+    'set.comfortable':'Comfortable · artwork', 'set.compact':'Compact · data saver',
+    'set.art':'Show event and gacha artwork (loaded from sekai.best)',
+    'set.artOff':'Artwork only appears in Comfortable view.',
+    'art.title':'Comfortable view shows artwork',
+    'art.body':`<p>Comfortable view adds the event banner and gacha banners, loaded straight from
+      <b>sekai.best</b>, a community-run mirror of the game's assets. Each image is about 20–30 KB, a few per column.</p>
+      <p>Compact view stays text-only, so it doubles as a data saver.</p>`,
+    'art.load':'Load artwork', 'art.go':'Switch to Comfortable', 'art.cancel':'Stay in Compact',
+    'set.clock':'Clock', 'set.clockAuto':'Auto', 'set.clock12':'12-hour', 'set.clock24':'24-hour',
+    'set.clockNote':'Auto shows each server\'s time the way its game client does, and your own time the way your system does.',
+    'set.sysDates':'Use my system\'s date format instead of English',
     'set.presets':'Row presets',
     'preset.help':'?',
     'preset.helpTitle':'What the presets change',
@@ -518,21 +701,26 @@ const STRINGS = {
       <ul class="mfacts">
         <li><b>Deadlines</b> — event ends, event gacha, item exchange, last virtual show</li>
         <li><b>Event tasks</b> — all episodes viewed, 10 full combos, final bonus reward</li>
-        <li><b>Extras</b> — mission pass bought and completed, first 3 ranked matches, CN weekly badge</li>
-        <li><b>Other gachas</b> — every concurrent banner, folded away</li>
+        <li><b>Stamp missions &amp; shops</b> — collaboration and anniversary stamp missions, limited-time exchange shops</li>
+        <li><b>Extras</b> — mission pass bought and completed, the mission-pass progress advisor and its Colorful+ options, first 3 ranked matches, CN weekly badge, paid Connect Live shows</li>
+        <li><b>Other gachas</b> — every concurrent banner, folded away, including the paid-crystal and Colorful+ ones</li>
         <li><b>Export</b> — the +cal links and the .ics button</li>
       </ul>
-      <p><b>Crystals only</b> hides the two gacha rows — the event gacha and the other-gachas list.
-      Those are about spending crystals rather than collecting them. Virtual shows stay: they pay
-      out crystals or wish pieces, so they are always worth keeping.</p>
-      <p><b>Free-to-play</b> hides both mission-pass rows, since they only make sense once you have
-      bought the pass.</p>
-      <p>The two combine, and every row stays switchable afterwards in Settings.</p>`,
+      <p><b>Show everything</b> switches every row back on: the defaults.</p>
+      <p><b>Hide all gachas</b> hides the event gacha and the other-gachas list. Those are about
+      spending crystals rather than collecting them. Virtual shows stay: they pay out crystals or
+      wish pieces, so they are always worth keeping.</p>
+      <p><b>Free-to-play</b> hides everything that needs real money: both mission-pass rows (they only
+      make sense once you have bought the pass), paid Connect Live shows, banners that take only paid
+      crystals or need a Colorful+ subscription, and the Colorful+ options in the mission-pass advisor.</p>
+      <p>Presets combine, and every row stays switchable afterwards in Settings.</p>`,
     'dlg.close':'Close',
     'preset.note':'A preset sets the row toggles below and nothing else — change anything afterwards. Applying two combines them.',
-    'preset.everything':'Restore defaults',
-    'preset.crystals':'Crystals only',
+    'preset.everything':'Show everything',
+    'preset.crystals':'Hide all gachas',
     'preset.f2p':'Free-to-play',
+    'preset.rec':'recommended',
+    'fr.recNote':'<b>Free-to-play is recommended</b> if you don\'t spend money on the game: it hides the premium mission pass, paid Connect Live shows, paid-crystal and Colorful+ banners, and the Colorful+ options. Every row can be switched back on later.',
     'preset.applied':'Applied {name}.',
     'preset.save':'Save current',
     'preset.namePh':'Name this setup',
@@ -544,15 +732,47 @@ const STRINGS = {
     'set.askOver':'Ask before any download over',
     'set.mb':'MB',
     'set.never':'never ask',
+    'set.testing':'Testing',
+    'sec.basics':'Basics', 'sec.shown':'What\'s shown', 'sec.time':'Time & data', 'sec.testing':'Testing & setup',
+    'sec.rows':'Customize rows',
+    'set.ttHelp':'Time travel', 'set.help':'What this does', 'set.setup':'First-time setup',
+    'sum.rows':'{n} of {total} rows shown', 'sum.compact':'Compact', 'sum.comfortable':'Comfortable',
+    'sum.light':'Light', 'sum.dark':'Dark', 'sum.system':'System theme', 'sum.ttOn':'time travel is on',
+    'set.rerun':'Run the first-time setup again',
+    'set.rerunNote':'Shows the setup page with your current choices. Nothing is reset.',
+    'fr.back':'Back to the dashboard',
+    'tt.toggle':'Time travel: see the page as it would look at another date and time',
+    'tt.setNote':'Opens a bar at the bottom of the page. It moves only the clock this page uses; the data is whatever was last downloaded. Nothing you tick while it is open is saved, and closing it puts everything back.',
+    'tt.title':'⏱ Time travel',
+    'tt.real':'= real time', 'tt.ahead':'{d} ahead of real time', 'tt.behind':'{d} behind real time',
+    'tt.exit':'Back to real time',
+    'tt.sliderAria':'offset from real time, in hours', 'tt.min':'−120 d', 'tt.max':'+60 d',
+    'tt.loadOld':'Loading older virtual-show schedules…',
+    'tt.loadedOld':'Older virtual-show schedules loaded for this session.',
+    'tt.g.extras':'stamp missions, shops, Connect Live',
+    'tt.m.pmEnd':'{name}: missions end', 'tt.m.mxEnd':'Shop closes: {name}',
+    'tt.m.cliveStart':'{name}: first show', 'tt.m.cliveEnd':'{name}: last show ends',
+    'tt.dtAria':'exact date and time',
+    'tt.jump':'Jump to 1 minute before…',
+    'tt.reopen':'↺ As if just opened',
+    'tt.sandbox':'Nudging keeps the event you are looking at; the slider, the date box and a jump show what a fresh page load would. Ticks made here are not saved.',
+    'tt.m.start':'Event starts', 'tt.m.end':'Event ends', 'tt.m.exch':'Item exchange closes',
+    'tt.m.vfirst':'First show ({kind})', 'tt.m.vlast':'Last show ends ({kind})',
+    'tt.m.gone':'Leaves the event menu',
     'set.dataNote':'Sizes are the compressed bytes actually downloaded, checked against the server before each fetch. For scale: a full refresh is {total} for your selected servers, and gacha timing is the only large one.',
 
     'grp.Deadlines':'Deadlines', 'grp.Event tasks':'Event tasks', 'grp.Extras':'Extras', 'grp.Gachas':'Gachas',
+    'grp.Campaigns':'Stamp missions & shops',
+    'row.stamps':'Stamp missions', 'row.mexchange':'Limited-time exchange shops',
+    'row.mpadv':'Mission pass progress advisor', 'row.clive':'Connect Live (paid)',
     'row.aggregate':'Event ends / starts', 'row.gacha':'Event gacha', 'row.exchange':'Item exchange',
     'row.vshow':'Last virtual show', 'row.episodes':'Viewed all event episodes',
     'row.combo10':'10 full combos mission', 'row.finalreward':'Final bonus reward',
     'row.pass':'Premium mission pass purchased', 'row.passdone':'Mission pass completed',
     'row.rank':'Ranked match qualification', 'row.badge':'Weekly badge exchange (CN)',
     'row.othergachas':'Other gachas list',
+    'row.paidgachas':'Paid-crystal & Colorful+ banners',
+    'row.cplus':'Colorful+ options in the advisor',
     'row.cal':'Add-to-calendar links', 'row.ics':'Calendar file export',
     'grp.Export':'Export',
 
@@ -563,13 +783,12 @@ const STRINGS = {
     'col.staleNote':'Cache may be stale (DB {age}). Fetch the latest to check for a new event.',
     'col.refreshNow':'↻ refresh now',
     'col.refresh':'↻ refresh',
-    'col.refreshDb':'↻ DB', 'col.refreshGacha':'↻ gacha',
     'col.refreshing':'refreshing',
     'col.db':'DB {age}',
     'col.gachaAge':'gacha {age}',
 
-    'st.live':'live', 'st.today':'starts today', 'st.tomorrow':'starts tomorrow',
-    'st.inDays':'in {n}d (server)', 'st.wrapping':'wrapping up',
+    'st.live':'live', 'st.today':'starts this server day', 'st.tomorrow':'starts next server day',
+    'st.inDays':'starts in {n} server days', 'st.wrapping':'wrapping up', 'st.ended':'ended',
 
     'etype.marathon':'Marathon', 'etype.cheerful_carnival':'Cheerful Carnival', 'etype.world_bloom':'World Link',
 
@@ -583,11 +802,12 @@ const STRINGS = {
     'task.episodes':'Viewed all event episodes',
     'task.combo10':'10 full combos mission',
     'task.finalreward':'Final bonus reward claimed',
-    'task.episodesShort':'Episodes', 'task.combo10Short':'10 combos', 'task.finalrewardShort':'Bonus reward',
+    'task.episodesShort':'{n} story eps', 'task.episodesShort0':'All story eps',
+    'task.combo10Short':'10 full combos', 'task.finalrewardShort':'All bonus claimed',
 
     'v.following':'Following virtual show',
     'v.noneAfter':'No additional show after this one',
-    'v.noSchedule':'No schedule in the DB yet — row uses event close. Verify in-game.',
+    'v.noSchedule':'No schedule in the DB yet, so this is currently estimated with the event close time.',
     'v.auto':'auto · soonest',
     'v.nextIn':'Next show in', 'v.next':'Next show', 'v.liveEndsIn':'Show LIVE — ends in',
     'v.allFinished':'all shows finished',
@@ -602,9 +822,39 @@ const STRINGS = {
     'g.retry':'Retry gacha load',
     'g.loadNote':'Large download, once per server, then cached. Adds the event gacha above and all concurrent gachas here.',
     'g.other':'🎰 Other gachas',
-    'g.show':'Show {n} gachas', 'g.showN':'{n} gachas',
-    'g.folded':'Also upcoming · ended · done · {n}',
+    'g.counts':'{active} active · {total} total',
+    'g.folded':'Also {up} upcoming · {ended} ended · {done} done',
     'g.nothingLive':'nothing live or permanent right now',
+    'g.noCeil':'I don\'t have the equivalent of 90,000 crystals saved (300 pulls; exchange tickets count)',
+    'g.noCeilOld':'Refresh gacha data once (↻ gacha, at the top) so the tool can tell which banners take free crystals.',
+    'g.gamble':'🎲 Gachas that take free crystals · {n}', 'g.gambleSoonest':' · next ',
+    'g.safe':'Free & paid-only gachas', 'g.safeFree':'Free gachas',
+    'g.safeNote':'These don\'t take your free crystals: ticket and free pulls, and banners that only take paid crystals.',
+    'g.safeNoteFree':'These don\'t take your free crystals: ticket and free pulls.',
+    'g.paidOld':'Refresh gacha data once (↻ gacha, at the top) so Free-to-play can hide the paid-only banners.',
+    'g.skipNote':'Muted: it takes free crystals, and you don\'t have the equivalent of a full pity saved.',
+    // the author's own wording (V36), with light grammar fixes; the voucher name is as the author gave it
+    'gam.title':'Wait! Here\'s a reminder:',
+    'gam.body':`<p>The only way to guarantee getting one featured character from a gacha is to reach the
+      <b>hard pity</b>: 300 pulls, or 90,000 crystals.</p>
+      <p>If you don't have 10 "Limited Gacha Sticker Voucher" saved yet, you can pull until you have saved 10.</p>
+      <p>Otherwise, pulling like this is taking chances, and RNG is merciless. Please don't gamba for the
+      sake of it. Gamba when you at least get something in return, and here that means: keep saving until
+      you can hit the hard pity.</p>`,
+    'gam.ok':'I understand, show them', 'gam.no':'Keep closed',
+    'hint.live':'<b>{name}</b> is live now.',
+    'hint.go':'Move on →',
+    'hint.why':'This column stays on the older event because you have ticked items on it and its item exchange is open until {when}.',
+    'sp.title':'🎫 Stamp missions & shops',
+    'sp.pages':'{n} pages',
+    'sp.ticked':'{d} of {n} pages ticked', 'sp.ticked1':'{d} of 1 page ticked',
+    'sp.claim':'rewards claimable until {closed}',
+    'sp.claimNow':'missions have ended; claim rewards before it closes',
+    'sp.shop':'🛒 {names}', 'sp.more':'+{n} more',
+    'cal.pm':'Stamp missions end: {name}', 'cal.mx':'Shop closes: {name}', 'cal.clive':'{name} begins',
+    'why.pm':'The stamp missions "{name}" stop counting progress.',
+    'why.mx':'The limited-time exchange shop ({name}) closes.',
+    'why.clive':'The paid Connect Live "{name}" starts its first show.',
     'g.nothingFolded':'nothing folded',
     'g.unnamed':'gacha',
 
@@ -612,8 +862,28 @@ const STRINGS = {
     'x.pass':'Premium mission pass purchased',
     'x.passdone':'Mission pass completed',
     'x.rank':'Played 3 ranked matches · {season}',
+    'x.clive':'🎥 {name}',
+    'x.cliveNote':'Paid Connect Live · {day}: {times}',
+    'x.mp':'📈 Mission pass progress',
+    'mp.val':'{p} / {max} · tier {tier}/{tiers}',
+    'mp.aria':'your live mission points this month',
+    'mp.cp':'I already have Colorful+ (2× live points)',
+    'mp.whatIf':'What if I buy Colorful+ now?',
+    'mp.wifFinish':'<b>With Colorful+ from now</b> (2× live points), you would finish around {date}.',
+    'mp.wifShort':'<b>With Colorful+ from now</b> (2× live points), you would reach about {proj} of {max}, still {short} short.',
+    'mp.unset':'Drag the slider to your current live mission points for an estimate.',
+    'mp.done':'<b>Complete</b>: every tier this month is done.',
+    'mp.early':'Too early to judge a pace. To finish, aim for about <b>{d} points a day</b>.',
+    'mp.ahead':'<b>Ahead</b>: at this pace you finish around {date}.',
+    'mp.track':'<b>On track</b>: at this pace you finish around {date}, close to the end.',
+    'mp.behind':'<b>Needs to catch up</b>: at this pace you reach about {proj} of {max}, {short} short. Finishing takes about {need} points a day from now, against {pace} a day so far.',
+    'mp.cpIn':'Your pace already includes Colorful+.',
+    'mp.asOf':'Based on your entry {age}. The month ends {end}.',
+    'mp.maxLoading':'Loading this month\'s tier count…',
+    'mp.maxAssumed':'Assuming {max} points until this month\'s tier count is loaded (touch the slider).',
 
     'cd.startsIn':'starts in ', 'cd.endsIn':'ends in ',
+    'cd.ongoing':'ongoing · {t} left', 'cd.nextRun':'next run in ', 'cd.lastRun':'last run in ',
     'cd.permanent':'permanent', 'cd.ended':'ended', 'cd.done':'✓ done',
 
     'ov.allDone':'All {server} event tasks checked',
@@ -641,8 +911,46 @@ const STRINGS = {
     'age.never':'never', 'age.m':'{n}m ago', 'age.h':'{n}h ago', 'age.d':'{n}d ago',
 
     'foot.feedback':'Send feedback', 'foot.issues':'Report an issue', 'foot.source':'Source code',
-    'e.ics':'.ics',
-    'e.icsOut':'{server} .ics — saved to downloads (Google Calendar → Settings → Import)',
+    'e.ics':'📅 Export to calendar (.ics)…',
+
+    'cal.starts':'Event starts', 'cal.aggregate':'Event ends', 'cal.gacha':'Event gacha ends',
+    'cal.exchange':'Item exchange closes', 'cal.vshow':'Last virtual show',
+    'cal.pass':'Mission pass resets', 'cal.rank':'Ranked season ends', 'cal.badge':'Weekly badge exchange resets',
+    'cal.gachaEnds':'{name} ends', 'cal.gachaStarts':'Event gacha opens', 'cal.vshowFirst':'First virtual show',
+    'why.gachaStarts':'The event gacha ({name}) opens.',
+    'why.vshowFirst':'The first showing of {name} begins.',
+    'why.starts':'The event begins.',
+    'why.aggregate':'The event ends: the point race closes.',
+    'why.open':'Not checked off yet: {list}.',
+    'why.gacha':'The event gacha ({name}) leaves the shop.',
+    'why.exchange':'The event\'s item exchange closes.',
+    'why.vshow':'The last scheduled showing of {name} ends.',
+    'why.approx':'Approximate: the data has no exact time for this yet, so it uses the event close. Check in-game.',
+    'why.pass':'The monthly mission pass resets.',
+    'why.rank':'Ranked season {name} ends.',
+    'why.badge':'The weekly badge exchange resets.',
+    'why.otherGacha':'{name} leaves the shop.',
+    'cal.deadline':'When: {local} (your time) · {srv}',
+    'cal.event':'Event: {name} ({server}, {type})',
+    'cal.madeWith':'From PJSK Last Call · {url}',
+
+    'ics.title':'Export {server} to a calendar file',
+    'ics.intro':'Pick what goes in and rename anything you like. Exactly what is listed here is what the file contains.',
+    'ics.g.deadlines':'This event', 'ics.g.extras':'Extras', 'ics.g.gachas':'Other gachas',
+    'ics.none':'Nothing left to export: every deadline for this event has already passed.',
+    'ics.checked':'checked off',
+    'ics.titleAria':'calendar entry name',
+    'ics.len':'Each entry is a block ending at the deadline, lasting',
+    'ics.alarms':'Reminders before each entry\'s time',
+    'ics.custom':'or add', 'ics.hours':'hours', 'ics.days':'days', 'ics.add':'Add',
+    'ics.reset':'Reset', 'ics.removeAria':'remove the {d} reminder',
+    'ics.customAria':'custom reminder amount',
+    'ics.google':'Apple Calendar and Outlook keep these reminders. Google Calendar may not: it has been reported to keep them only when you import into your main calendar. If yours arrive without them, the entries get that calendar\'s default notifications. Change those in the calendar\'s settings.',
+    'ics.preview':'Show the file',
+    'ics.download':'Download the .ics with {n} calendar events', 'ics.download1':'Download the .ics with 1 calendar event',
+    'ics.close':'Close',
+    'ics.saved':'Saved {file}. In Google Calendar: Settings → Import & export → Import. In Apple Calendar or Outlook, open the file.',
+    'dur.m':'{n} min', 'dur.h':'{n} h', 'dur.d':'{n} day', 'dur.ds':'{n} days',
   },
 };
 /* Add a locale by adding an entry above and a row here. The first-run language step reveals
@@ -655,6 +963,7 @@ const LINKS = {
   source:   'https://github.com/YMDSan/pjsk-last-call',
   issues:   'https://github.com/YMDSan/pjsk-last-call/issues',
   feedback: 'https://forms.gle/6v2fyvQp7VQJujkE6',   // no account needed, the primary channel
+  app:      'https://ymdsan.github.io/pjsk-last-call/', // quoted in calendar entries, not the footer
 };
 function linksHtml(){
   const parts=[];
@@ -674,7 +983,7 @@ function t(key, p){
 const MB = 1048576;
 const PREFS = Object.assign({servers:null, showSrv:true, theme:'system',
                              rows:null, gachaFold:true, warnBytes:2*MB, locale:'en', hour12:'auto',
-                             density:'compact',
+                             density:'compact', ics:null, dateFmt:'en', mp:{}, noCeil:{}, art:null,
                              customPresets:[]}, (()=>{
   try{ return JSON.parse(localStorage.getItem(PREFS_KEY))||{}; }catch{ return {}; }
 })());
@@ -684,13 +993,21 @@ PREFS.rows = Object.assign({}, DEFAULT_ROWS, PREFS.rows||{});
 // 'legacy' was retired in V29; anyone carrying it lands on the roomier of the two that remain
 if(PREFS.density==='legacy') PREFS.density='comfortable';
 if(PREFS.density!=='comfortable' && PREFS.density!=='compact') PREFS.density='compact';
+/* calendar export: entry length and reminders, both in minutes. Remembered because they are a
+   property of how the user's calendar works, not of any one event. */
+const ICS_LENS=[15,30,60], ICS_ALARMS=[15,60,180,720,1440,2880];
+PREFS.ics = Object.assign({len:15, alarms:[180,1440]}, PREFS.ics||{});
+if(!ICS_LENS.includes(PREFS.ics.len)) PREFS.ics.len=15;
+if(!Array.isArray(PREFS.ics.alarms)) PREFS.ics.alarms=[180,1440];
+const ICS_MAX_ALARM = 30*1440;   // a custom reminder can be anything from 1 hour to 30 days
+PREFS.ics.alarms = PREFS.ics.alarms.filter(m=>Number.isInteger(m) && m>0 && m<=ICS_MAX_ALARM);
 function savePrefs(){ try{ localStorage.setItem(PREFS_KEY, JSON.stringify(PREFS)); }catch{} }
 const rowOn = k => PREFS.rows[k] !== false;
 const isCompact = () => PREFS.density === 'compact';
-/* Compact drops precision as the deadline recedes: seconds only matter inside the last day, hours
-   inside three, and past that the day count is the whole story. Mirrors the chip tiers exactly. */
+/* Countdowns drop precision as the deadline recedes: seconds only matter inside the last day, hours
+   inside three, and past that the day count is the whole story. Mirrors the chip tiers exactly.
+   Compact-only until V36; both densities use it now. */
 function spanFor(ms){
-  if(!isCompact()) return span(ms);
   if(ms < 0) ms = 0;
   const d = Math.floor(ms/86400000);
   if(ms < 24*3600000) return hms(ms);
@@ -717,13 +1034,17 @@ applyTheme();   // before first paint, so the tool never flashes the wrong palet
 /* ---------- per-instance "done" check-offs (separate key, survives cache refresh) ---------- */
 const DONE_KEY='pjsk_done_v1';
 let doneState = (()=>{ try{ return JSON.parse(localStorage.getItem(DONE_KEY))||{}; }catch{ return {}; } })();
-function saveDone(){ try{ localStorage.setItem(DONE_KEY, JSON.stringify(doneState)); }catch{} }
+/* inside the time-travel sandbox nothing is written: ticks made there are for trying things out */
+function saveDone(){ if(SIM) return; try{ localStorage.setItem(DONE_KEY, JSON.stringify(doneState)); }catch{} }
 /* `key` identifies the row TYPE (what rowOn mutes); `dk` identifies the specific INSTANCE being
    checked off. They differ for the virtual-show rung, whose selected live changes underneath it —
    keying its check-off by event alone meant ticking the birthday show also marked the event
    after-live done. */
 const rowDoneKey = r => r.dk || r.key;
-function doneKey(col,r){ return `${col.server}|${col.event.id}|${rowDoneKey(r)}`; }
+/* fk = a full key that is not event-scoped. The event gacha uses the same `<server>|G|<id>` key as
+   the other-gachas list: it was keyed by event, so ticking it there left the very same banner
+   unticked in "Other gachas" once the column moved to the next event. */
+function doneKey(col,r){ return r.fk || `${col.server}|${col.event.id}|${rowDoneKey(r)}`; }
 function isDone(col,r){ return !!doneState[doneKey(col,r)]; }
 (function pruneDone(){ const cut=now()-14*86400000; let ch=false;
   for(const k in doneState){ if(doneState[k]<cut || k.endsWith('|_skipped')){ delete doneState[k]; ch=true; } }   // _skipped: V15-only, now session-scoped
@@ -754,27 +1075,67 @@ function tzYMDH(ts,tz){
 }
 function serverDayIndex(ts,tz){ const p=tzYMDH(ts,tz); return Math.round(Date.UTC(p.y,p.mo-1,p.d)/86400000) - (p.h<4?1:0); }
 function serverDaysUntil(ts,tz){ return serverDayIndex(ts,tz)-serverDayIndex(now(),tz); }
-function srvClock(srv){ return `${SRV_LBL[srv]} ${new Date(now()).toLocaleString(dispLocale(),{timeZone:SRV_TZ[srv],hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:srvHour12(srv)})}`; }
+function srvClock(srv){ return `${SRV_LBL[srv]} ${new Date(now()).toLocaleString(dispLocale(),{timeZone:SRV_TZ[srv],hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:hc(srvHour12(srv))})}`; }
 
 /* generic check-off row (episodes, missions, recurring resets) */
 function checkRow(key,label,endTs,opts){
   opts=opts||{};
   const done=!!doneState[key];
-  const cd = opts.ddl ? `<span class="cd mono" data-end="${endTs}">${done?'✓ done':''}</span>` : '';
+  const cd = opts.ddl ? `<span class="cd mono"${opts.start?` data-start="${opts.start}"`:''}${opts.sch?` data-sch="${opts.sch}"`:''} data-end="${endTs}">${done?'✓ done':''}</span>` : '';
   // a <label> makes the whole row the tap target, which matters far more on a phone than the box
   return `<label class="citem${done?' done':''}${opts.sub?' sub':''}" data-key="${key}" data-end="${endTs}"><input type="checkbox" class="ichk" ${done?'checked':''}><span class="ilabel">${label}</span>${cd}</label>`;
 }
 
 /* slim to only the fields the app uses, so the whole cache stays well under the localStorage limit */
-const slimEvents = arr => arr.map(e=>({id:e.id,eventType:e.eventType,name:e.name,startAt:e.startAt,aggregateAt:e.aggregateAt,closedAt:e.closedAt}));
-function slimVlives(arr){
-  const lo=now()-30*86400000, hi=now()+150*86400000;
-  return arr.filter(v=>['normal','cheerful_carnival','world_bloom'].includes(v.virtualLiveType))
-    .map(v=>({id:v.id,virtualLiveType:v.virtualLiveType,name:v.name,
+/* ab = assetbundleName, the folder name of the event's artwork on the asset mirror */
+const slimEvents = arr => arr.map(e=>({id:e.id,eventType:e.eventType,name:e.name,startAt:e.startAt,aggregateAt:e.aggregateAt,closedAt:e.closedAt,ab:e.assetbundleName||null}));
+/* 'streaming' is the paid Connect Live; it never joins the virtual-show rung (matchVlives keeps
+   the free kinds only) and is listed under Extras instead. oa is when the game starts showing it.
+   The window is measured from REAL time, so a refresh made during time travel stores the same
+   thing a normal one would. */
+const VL_KINDS = ['normal','cheerful_carnival','world_bloom','streaming'];
+function slimVlives(arr, lo, hi){
+  lo = lo ?? realNow()-30*86400000; hi = hi ?? realNow()+150*86400000;
+  return arr.filter(v=>VL_KINDS.includes(v.virtualLiveType))
+    .map(v=>({id:v.id,virtualLiveType:v.virtualLiveType,name:v.name,oa:v.startAt||null,
       virtualLiveSchedules:(v.virtualLiveSchedules||[]).map(s=>({seq:s.seq,startAt:s.startAt,endAt:s.endAt}))}))
     .filter(v=>v.virtualLiveSchedules.some(s=>s.startAt>=lo && s.startAt<=hi));
 }
-const slimGachas = arr => arr.filter(g=>g.startAt&&g.endAt).map(g=>({id:g.id,name:g.name,gachaType:g.gachaType,startAt:g.startAt,endAt:g.endAt,pk:(g.gachaPickups||[]).map(p=>p.cardId)}));
+/* j = 1 when the banner can be pulled with free crystals ('jewel'; 'paid_jewel' is paid-only).
+   That is what the "no 90,000 crystals saved" switch sorts on. */
+/* What a banner can be pulled with, from its behaviours (V36, field `k`):
+     'j'  takes free crystals ('jewel'), so the 90,000-crystal pity question applies (also j:1)
+     'cp' every pull is a Colorful+ subscriber pull (gachaSpinnableType 'colorful_pass')
+     'p'  paid crystals only ('paid_jewel'): premium gift, your-pick, memorial select...
+     't'  everything else: ticket and free pulls */
+function gachaKind(bs){
+  bs=bs||[];
+  if(bs.some(b=>b.costResourceType==='jewel')) return 'j';
+  if(bs.length && bs.every(b=>b.gachaSpinnableType==='colorful_pass')) return 'cp';
+  if(bs.some(b=>b.costResourceType==='paid_jewel')) return 'p';
+  return 't';
+}
+const slimGachas = arr => arr.filter(g=>g.startAt&&g.endAt).map(g=>{ const k=gachaKind(g.gachaBehaviors);
+  return {id:g.id,name:g.name,gachaType:g.gachaType,startAt:g.startAt,endAt:g.endAt,
+    pk:(g.gachaPickups||[]).map(p=>p.cardId), j:k==='j'?1:0, k}; });
+/* stamp missions (panelMissionCampaigns) and limited-time exchange shops (materialExchangeSummaries).
+   A "page" is one sheet; a group with several sheets numbers them. Kept for 130 days back, so time
+   travel can show them, and 200 ahead. Shops without an end, or open for over a year, are the
+   permanent ones and are dropped. */
+function slimPM(arr){
+  const lo=realNow()-130*86400000, hi=realNow()+200*86400000;
+  return arr.filter(x=>(x.closedAt||x.progressEndAt||0)>=lo && (x.startAt||0)<=hi).map(x=>({
+    id:x.id, name:x.name, startAt:x.startAt, prog:x.progressEndAt||x.closedAt, closedAt:x.closedAt||x.progressEndAt,
+    pages:(x.panelMissionSheetGroups||[]).slice().sort((a,b)=>(a.seq||0)-(b.seq||0)).flatMap(g=>{
+      const sh=(g.panelMissionSheets||[]).slice().sort((a,b)=>(a.seq||0)-(b.seq||0));
+      return sh.map((p,i)=>({id:p.id, name: sh.length>1 ? `${g.name} ${i+1}` : g.name}));
+    })}));
+}
+function slimMX(arr){
+  const lo=realNow()-130*86400000, hi=realNow()+200*86400000;
+  return arr.filter(x=>x.endAt && x.endAt>=lo && (x.startAt||0)<=hi && x.endAt-(x.startAt||0) < 400*86400000)
+    .map(x=>({id:x.id, name:String(x.name||'').replace(/\s*\n\s*/g,' ').trim(), startAt:x.startAt||0, endAt:x.endAt}));
+}
 
 /* ---------- download size: poke, remember, estimate ----------
    GitHub raw answers HEAD with Access-Control-Allow-Origin:* and Content-Length is a
@@ -782,8 +1143,9 @@ const slimGachas = arr => arr.filter(g=>g.startAt&&g.endAt).map(g=>({id:g.id,nam
    carries the browser's own Accept-Encoding, so the number is the *compressed* size — the bytes
    that actually cross the wire, which is what a metered-data warning should quote.
    Order of preference: live poke > size recorded from the last poke > baked-in estimate. */
-const CORE_FILES = ['events.json','eventExchangeSummaries.json','eventCards.json','eventStories.json','rankMatchSeasons.json'];
-const RES_FILES = { core:CORE_FILES, vlives:['virtualLives.json'], gachas:['gachas.json'] };
+const CORE_FILES = ['events.json','eventExchangeSummaries.json','eventCards.json','eventStories.json','rankMatchSeasons.json','liveMissionPeriods.json'];
+const RES_FILES = { core:CORE_FILES, vlives:['virtualLives.json'], gachas:['gachas.json'],
+  specials:['panelMissionCampaigns.json','materialExchangeSummaries.json'], lmissions:['liveMissions.json'] };
 function fmtBytes(n){
   if(n==null) return t('b.unknown');
   if(n<1024) return t('b.B',{n});
@@ -823,19 +1185,24 @@ async function sizeFor(server, res){
 /* ---------- data ---------- */
 async function loadServer(s){
   if(cache[s] && cache[s].events) return cache[s];
-  const [er,xr,cr,sr,rr] = await Promise.all([
+  const [er,xr,cr,sr,rr,lr] = await Promise.all([
     fetch(`${RAW(s)}/events.json`,{cache:'no-store'}),
     fetch(`${RAW(s)}/eventExchangeSummaries.json`,{cache:'no-store'}).catch(()=>null),
     fetch(`${RAW(s)}/eventCards.json`,{cache:'no-store'}).catch(()=>null),
     fetch(`${RAW(s)}/eventStories.json`,{cache:'no-store'}).catch(()=>null),
-    fetch(`${RAW(s)}/rankMatchSeasons.json`,{cache:'no-store'}).catch(()=>null)
+    fetch(`${RAW(s)}/rankMatchSeasons.json`,{cache:'no-store'}).catch(()=>null),
+    fetch(`${RAW(s)}/liveMissionPeriods.json`,{cache:'no-store'}).catch(()=>null)
   ]);
   if(!er.ok) throw new Error(`events ${er.status}`);
   const exchange={}; if(xr&&xr.ok){ for(const x of await xr.json()) if(x.eventId) exchange[x.eventId]=x.endAt; }
   const eventCards={}; if(cr&&cr.ok){ for(const x of await cr.json()){ (eventCards[x.eventId]=eventCards[x.eventId]||[]).push(x.cardId); } }
   const episodes={}; if(sr&&sr.ok){ for(const x of await sr.json()){ if(x.eventId) episodes[x.eventId]=(x.eventStoryEpisodes||[]).length; } }
   let seasons=[]; if(rr&&rr.ok){ seasons=(await rr.json()).map(z=>({id:z.id,name:z.name,startAt:z.startAt,aggregatedAt:z.aggregatedAt,closedAt:z.closedAt})); }
+  // the live-mission (mission pass) months: they run 00:00 -> 23:59:59 server time, not from 04:00
+  let lmp=null; if(lr&&lr.ok){ lmp=(await lr.json()).map(z=>({id:z.id,startAt:z.startAt,endAt:z.endAt})); }
   cache[s]=cache[s]||{};
+  if(lmp) cache[s].lmp=lmp; else cache[s].lmp=cache[s].lmp||[];
+  cache[s].lmMax=cache[s].lmMax||{};
   cache[s].events=slimEvents(await er.json());
   cache[s].exchange=exchange;
   cache[s].eventCards=eventCards;
@@ -844,7 +1211,7 @@ async function loadServer(s){
   cache[s].vlives=cache[s].vlives||null;
   cache[s].gachas=cache[s].gachas||null;
   cache[s].fetchedAt=cache[s].fetchedAt||{};
-  cache[s].fetchedAt.core=now();
+  cache[s].fetchedAt.core=realNow();
   persist(s);
   return cache[s];
 }
@@ -852,10 +1219,11 @@ async function loadServer(s){
    file is never downloaded. That is the per-resource opt-out — one control, not two. */
 async function loadVlives(s){
   if(!rowOn('vshow')){ cache[s].vlives = cache[s].vlives || []; return cache[s].vlives; }
+  if(SIM && SIM.vl && SIM.vl[s]) return SIM.vl[s];   // time travel's wider, unpersisted copy
   if(cache[s].vlives) return cache[s].vlives;
   try{ const r=await fetch(`${RAW(s)}/virtualLives.json`,{cache:'no-store'}); cache[s].vlives = r.ok? slimVlives(await r.json()):[]; }
   catch{ cache[s].vlives=[]; }
-  cache[s].fetchedAt=cache[s].fetchedAt||{}; cache[s].fetchedAt.vlives=now();
+  cache[s].fetchedAt=cache[s].fetchedAt||{}; cache[s].fetchedAt.vlives=realNow();
   persist(s);
   return cache[s].vlives;
 }
@@ -864,20 +1232,53 @@ async function loadGachas(s){
   const r=await fetch(`${RAW(s)}/gachas.json`,{cache:'no-store'});
   if(!r.ok) throw new Error(`gachas ${r.status}`);
   cache[s].gachas = slimGachas(await r.json());
-  cache[s].fetchedAt=cache[s].fetchedAt||{}; cache[s].fetchedAt.gachas=now();
+  cache[s].fetchedAt=cache[s].fetchedAt||{}; cache[s].fetchedAt.gachas=realNow();
   persist(s);
   return cache[s].gachas;
 }
 function exchangeEnd(s,ev){ const e=cache[s]&&cache[s].exchange[ev.id]; return (typeof e==='number')? e : null; }
+/* Stamp missions and limited shops: about 100-150 KB per server, fetched only while one of their
+   two rows is on, and refreshed along with the DB. */
+async function loadSpecials(s){
+  const c=cache[s]; if(!c) return;
+  if(!rowOn('stamps') && !rowOn('mexchange')) return;
+  if(c.pm && c.mx) return;
+  const get=f=>fetch(`${RAW(s)}/${f}`,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+  const [pm,mx]=await Promise.all([get('panelMissionCampaigns.json'), get('materialExchangeSummaries.json')]);
+  c.pm = pm ? slimPM(pm) : []; c.mx = mx ? slimMX(mx) : [];
+  c.fetchedAt=c.fetchedAt||{}; c.fetchedAt.specials=realNow();
+  persist(s);
+}
+/* The number of mission-pass points in a month (8,000 to 20,000 so far) lives only in
+   liveMissions.json, 50-240 KB. It is fetched the first time the advisor is used in a month, and
+   only the per-month maximum is kept. JP and EN list one month at a time; CN lists months ahead. */
+async function loadLMMax(s){
+  const c=cache[s]; if(!c || c.lmLoading) return;
+  c.lmLoading=true;
+  try{
+    if(!await confirmFetch(s,'lmissions')){ c.lmDeclined=true; return; }
+    const r=await fetch(`${RAW(s)}/liveMissions.json`,{cache:'no-store'});
+    if(!r.ok){ c.lmFailed=true; return; }
+    const mx={};
+    for(const m of await r.json()){ if(m.liveMissionType==='free') mx[m.liveMissionPeriodId]=Math.max(mx[m.liveMissionPeriodId]||0, m.requirement||0); }
+    c.lmMax=Object.assign(c.lmMax||{}, mx);
+    c.fetchedAt=c.fetchedAt||{}; c.fetchedAt.lmissions=realNow();
+    persist(s);
+  }catch{ c.lmFailed=true; }
+  finally{ c.lmLoading=false; }
+}
+function curPeriod(S){ const n=now(); return ((cache[S]&&cache[S].lmp)||[]).find(p=>p.startAt<=n && n<=p.endAt) || null; }
+/* the pass resets when the next live-mission month starts; the 04:00 guess is only the fallback */
+function passResetAt(S){ const p=curPeriod(S); return p ? p.endAt+1000 : nextMonthlyReset(SRV_TZ[S]); }
 
 /* refresh: clear the relevant slice, refetch, re-persist, re-render */
 async function refreshCore(col){
   const s=col.server;
-  if(cache[s]){ cache[s].events=null; cache[s].vlives=null; }
+  if(cache[s]){ cache[s].events=null; cache[s].vlives=null; cache[s].pm=null; cache[s].mx=null; }
   await loadServer(s); await loadVlives(s); persist(s);
-  col.events=relevant(cache[s].events);
+  col.events=relevant(cache[s].events, s);
   if(!col.events.length){ renderEmpty(col); return; }
-  col.event=col.events.find(e=>e.id===(col.event&&col.event.id)) || autoEvent(col.events);
+  col.event=col.events.find(e=>e.id===(col.event&&col.event.id)) || autoEvent(col.events, s);
   await prepEvent(col); renderColumn(col);
 }
 async function refreshGachas(col){
@@ -894,11 +1295,23 @@ const STALE_CORE=2*86400000, STALE_GACHA=5*86400000;
 function coreAge(s){ const fa=cache[s].fetchedAt||{}; return fa.core? now()-fa.core : Infinity; }
 function gachaAge(s){ const fa=cache[s].fetchedAt||{}; return fa.gachas? now()-fa.gachas : null; }
 
-function relevant(events){
+/* Measured from wrapEndOf, not closedAt: on EN the exchange outlives closedAt by 8-10 days, so
+   the old closedAt+4d cut dropped an event from the picker while its exchange was still open. */
+function relevant(events,srv){
   const n=now(), lo=n-4*86400000, hi=n+90*86400000;
-  return events.filter(e=>(e.closedAt||0)>=lo && (e.startAt||0)<=hi).sort((a,b)=>(a.startAt||0)-(b.startAt||0));
+  return events.filter(e=>wrapEndOf(e,srv)>=lo && (e.startAt||0)<=hi).sort((a,b)=>(a.startAt||0)-(b.startAt||0));
 }
-/* srv is optional: autoEvent only reads .k, so it can skip the server-day work */
+/* An event has three lives after it starts, and the badge names each one:
+     live         start -> aggregateAt   the point race: the "Event ends" countdown
+     wrapping up  -> the last thing that still closes: the after-show runs about a day past the
+                  end and the item exchange a week or more (§3), so there is still work to do
+     ended        once that has closed too
+   Before V31 the badge read "live" all the way to closedAt, the game's own close stamp about two
+   days after the end, and "wrapping up" only AFTER that -- so it said "live" while the after-show
+   ran and "wrapping up" once only the exchange was left, which read backwards.
+   closedAt stays in the max because it always lies after the after-show (checked against every
+   EN and JP event of Aug-Sep 2026), so no virtual-live data is needed to place the boundary. */
+function wrapEndOf(e,srv){ return Math.max(e.closedAt||0, (srv && exchangeEnd(srv,e)) || 0); }
 function statusOf(e,srv){
   const n=now();
   if(n<e.startAt){
@@ -906,10 +1319,31 @@ function statusOf(e,srv){
     const d=serverDaysUntil(e.startAt,SRV_TZ[srv]);
     return {k:'soon', t: d<=0?t('st.today') : d===1?t('st.tomorrow') : t('st.inDays',{n:d})};
   }
-  if(n<=e.closedAt)return{k:'live',t:t('st.live')};
-  return{k:'past',t:t('st.wrapping')};
+  if(n<e.aggregateAt) return {k:'live',t:t('st.live')};
+  if(n<wrapEndOf(e,srv)) return {k:'wrap',t:t('st.wrapping')};
+  return {k:'past',t:t('st.ended')};
 }
-function autoEvent(events){ return events.find(e=>statusOf(e).k==='live') || events.find(e=>statusOf(e).k==='soon') || events[events.length-1]; }
+/* Which event a column opens on.
+     1. Events you have moved on from (the all-done prompt's "next event" button) are skipped. That click is remembered
+        with the check-offs, so a reload no longer drops you back onto the finished event.
+     2. Of the rest: the live one, else one still wrapping up, else the next to start.
+     3. Unless an EARLIER event is still wrapping up and you have ticked something on it: then that
+        one, so unfinished business (usually the item exchange) is not hidden by a new event going
+        live. Someone who never ticks anything simply gets the live event.
+   An event stops being a candidate when its last deadline passes, and leaves the menu 4 days later. */
+const movedKey = (srv,id) => `${srv}|${id}|_moved`;
+function hasChecks(srv,id){ const p=`${srv}|${id}|`; for(const k in doneState){ if(k.startsWith(p) && !k.endsWith('|_moved')) return true; } return false; }
+function autoEvent(events,srv){
+  const unmoved=events.filter(e=>!doneState[movedKey(srv,e.id)]);
+  const pool=unmoved.length ? unmoved : events;
+  const first=k=>pool.find(e=>statusOf(e,srv).k===k);
+  /* of several events wrapping up at once (an exchange runs a week or more past its event), the
+     most recent: picking the oldest put JP on an event that ended weeks ago, between two events */
+  const wraps=pool.filter(e=>statusOf(e,srv).k==='wrap');
+  const base=first('live') || wraps[wraps.length-1] || first('soon') || pool[pool.length-1];
+  const owed=pool.find(e=>e.startAt<base.startAt && statusOf(e,srv).k==='wrap' && hasChecks(srv,e.id));
+  return owed || base;
+}
 
 function matchVlives(vlives, ev){
   const lo=ev.startAt-6*3600000, hi=ev.closedAt+6*3600000;
@@ -939,32 +1373,47 @@ function subsequentVlive(col, current){
   const n=now();
   return (col.vMatches||[]).filter(v=>v.id!==current.id && v._s0>current._s0 && v._s1>n).sort((a,b)=>a._s0-b._s0)[0] || null;
 }
+/* Which gacha, if any, is THE event gacha. Two signals, and no guessing:
+     1. it features the event's own cards (see DESIGN.md §3), or failing that
+     2. it is named after the event -- the "Memories" events have no card list at all, but their
+        banner is called "<event name>ガチャ".
+   Either way it must run DURING the event: a World Link finale's card list spans every earlier
+   chapter, and matched a one-day rerun banner that closed hours before the finale opened.
+   The old last resort, "whichever short gacha starts closest", is gone. It only ever fired for
+   events with no card list, and for those it picked whatever happened to be nearby -- a birthday
+   gacha for the one-day Cheerful Carnival test event (JP 224, Nov 2026). No match now means no
+   event gacha row, which is the honest answer. */
 function matchGachas(gachas, ev, evCards){
-  const lo=ev.startAt-2*86400000, hi=ev.closedAt+2*86400000;
-  const ov=gachas.filter(g=>g.startAt<hi && g.endAt>ev.startAt-86400000);
-  if(!ov.length) return {event:null, others:[]};
+  const during=gachas.filter(g=>g.startAt<ev.aggregateAt && g.endAt>ev.startAt);
+  const near=(a,b)=>Math.abs(a.startAt-ev.startAt)-Math.abs(b.startAt-ev.startAt);
   let eventG=null;
-  if(evCards && evCards.size){   // the real event gacha features the event's own cards
-    const scored=ov.map(g=>({g, o:(g.pk||[]).reduce((k,id)=>k+(evCards.has(id)?1:0),0)}))
-                   .filter(x=>x.o>0)
-                   .sort((a,b)=> b.o-a.o || Math.abs(a.g.startAt-ev.startAt)-Math.abs(b.g.startAt-ev.startAt));
+  if(evCards && evCards.size){
+    const scored=during.map(g=>({g, o:(g.pk||[]).reduce((k,id)=>k+(evCards.has(id)?1:0),0)}))
+                   .filter(x=>x.o>0).sort((a,b)=> b.o-a.o || near(a.g,b.g));
     if(scored.length) eventG=scored[0].g;
   }
-  if(!eventG){   // fallback for old events lacking card data: closest start among short-run gachas
-    const short=ov.filter(g=>(g.endAt-g.startAt)<21*86400000); const pool=short.length?short:ov;
-    eventG=pool.slice().sort((a,b)=>Math.abs(a.startAt-ev.startAt)-Math.abs(b.startAt-ev.startAt))[0];
+  if(!eventG && ev.name){
+    // the plain "<event> gacha" banner is the shortest name; the limited/beginner variants are longer
+    const named=during.filter(g=>(g.name||'').includes(ev.name)).sort((a,b)=>a.name.length-b.name.length || near(a,b));
+    if(named.length) eventG=named[0];
   }
+  return {event:eventG};
+}
+/* "Other gachas" is about NOW, not about the selected event: everything running at this moment,
+   whichever event is on screen. It used to be the banners overlapping the selected event's window,
+   so reviewing an old event listed mostly dead banners and a gacha that opened after the window
+   never appeared. The fold keeps a little context either side: starting within two weeks, ended
+   within three days. */
+const G_UPCOMING=14*86400000, G_ENDED=3*86400000;
+function currentGachas(gachas, skipId){
   const n=now();
-  const gphase=g=> n>=g.endAt ? 2 : (g.endAt-n>400*86400000 ? 1 : 0);
-  const gkey=g=> n<g.startAt ? g.startAt : g.endAt;
-  const others=ov.filter(g=>g.id!==eventG.id).sort((a,b)=>{ const pa=gphase(a),pb=gphase(b); return pa!==pb ? pa-pb : gkey(a)-gkey(b); });
-  return {event:eventG, others};
+  return gachas.filter(g=>g.id!==skipId && g.startAt<n+G_UPCOMING && g.endAt>n-G_ENDED);
 }
 function applyGachas(col){
   const c=cache[col.server];
-  if(!c||!c.gachas){ col.eventGacha=null; col.otherGachas=[]; return; }
+  if(!c||!c.gachas){ col.eventGacha=null; return; }
   const evCards=new Set((c.eventCards&&c.eventCards[col.event.id])||[]);
-  const m=matchGachas(c.gachas, col.event, evCards); col.eventGacha=m.event; col.otherGachas=m.others;
+  col.eventGacha=matchGachas(c.gachas, col.event, evCards).event;
 }
 
 /* deadlines for a column's selected event */
@@ -980,7 +1429,8 @@ function deadlinesFor(col){
     pending
       ? {key:'aggregate', em:'🏁', label:t('rung.startsIn'), calLabel:t('rung.starts'), start:ev.startAt, at:ev.startAt, end:ev.aggregateAt, bare:true}
       : {key:'aggregate', em:'🏁', label:t('rung.ends'),     end:ev.aggregateAt},
-    g ? {key:'gacha', em:'🎰', label:t('rung.gacha'),    start:g.startAt, end:g.endAt, note:g.name} : null,
+    g ? {key:'gacha', em:'🎰', label:t('rung.gacha'),    start:g.startAt, end:g.endAt, note:g.name,
+         fk:`${col.server}|G|${g.id}`, gid:g.id, skip: noCeil(col.server) && g.j===1} : null,
     {key:'exchange',  em:'🛒', label:t('rung.exchange'),  end: exEnd ?? ev.closedAt, note: exEnd? null : t('rung.approxClose')},
     {key:'vshow',     em:'🎤', label:t('rung.vshow'), end: vEnd ?? ev.closedAt, note: vEnd? null : t('rung.approxClose'),
       dk: v? 'vshow:'+v.id : 'vshow'},
@@ -992,7 +1442,35 @@ function deadlinesFor(col){
    tickColumn re-renders when this string moves, otherwise those go stale on screen. */
 function renderSig(col){
   const v=selectedVlive(col), st=statusOf(col.event, col.server);
-  return `${v?v.id:''}|${st.k}|${st.t}`;
+  /* a gacha opening or closing moves it between the visible list and the fold, so count both
+     edges: any single start or end changes one of the two numbers */
+  let gs='';
+  const c=cache[col.server];
+  if(c && c.gachas && rowOn('othergachas')){ const n=now(); let a=0,b=0; for(const g of c.gachas){ if(g.startAt<=n) a++; if(g.endAt<=n) b++; } gs=a+'/'+b; }
+  /* stamp missions, shops and Connect Live appear and disappear with the clock too, and a newer
+     event going live brings up the "move on" hint */
+  const n=now(); let xs=0;
+  if(c){
+    for(const x of (c.pm||[])){ if(x.startAt-3*86400000<=n) xs++; if(x.prog<=n) xs++; if(x.closedAt<=n) xs++; }
+    for(const x of (c.mx||[])){ if(x.startAt-3*86400000<=n) xs++; if(x.endAt<=n) xs++; }
+    for(const v of (c.vlives||[])){ if(v.virtualLiveType!=='streaming') continue; const w=cliveWindow(v); if(w && w.from<=n) xs++; if(w && w.last<=n) xs++; }
+  }
+  const p=curPeriod(col.server), ln=liveNextOf(col);
+  return `${v?v.id:''}|${st.k}|${st.t}|${gs}|${xs}|${p?p.id:''}|${ln?ln.id:''}`;
+}
+/* a later event that is live while this column shows one that has ended */
+function liveNextOf(col){
+  const ev=col.event; if(!ev) return null;
+  const k=statusOf(ev,col.server).k; if(k!=='wrap' && k!=='past') return null;
+  return col.events.find(e=>e.startAt>ev.startAt && statusOf(e,col.server).k==='live') || null;
+}
+/* a Connect Live is listed from when the game announces it (or a week before its first show)
+   until its last show ends */
+function cliveWindow(v){
+  const sch=(v.virtualLiveSchedules||[]).slice().sort((a,b)=>a.startAt-b.startAt); if(!sch.length) return null;
+  // a showing with no end time in the data counts as SHOW_GUESS long (see tickShows)
+  const first=sch[0].startAt, last=Math.max(...sch.map(x=>x.endAt>x.startAt ? x.endAt : x.startAt+SHOW_GUESS));
+  return {sch, first, last, from: (v.oa && v.oa<first) ? v.oa : first-7*86400000};
 }
 
 /* ---------- "everything for this event is checked" → offer the next event ---------- */
@@ -1000,13 +1478,15 @@ function renderSig(col){
    sub-tasks are shown. Extras are recurring, and "other gachas" aren't event-scoped, so neither
    counts. A muted row type is not a task the user still owes, so it drops out of the scope too. */
 const EVENT_SUBTASKS = ['episodes','combo10','finalreward'];
+/* a muted event gacha (no full guarantee saved) is not something the user still owes */
 function eventTaskKeys(col){
   const p=`${col.server}|${col.event.id}|`;
-  return deadlinesFor(col).map(r=>p+rowDoneKey(r)).concat(EVENT_SUBTASKS.filter(rowOn).map(k=>p+k));
+  return deadlinesFor(col).filter(r=>!r.skip).map(r=>doneKey(col,r)).concat(EVENT_SUBTASKS.filter(rowOn).map(k=>p+k));
 }
 function allEventDone(col){ const k=eventTaskKeys(col); return k.length>0 && k.every(x=>!!doneState[x]); }
-/* dismissal is in-memory only: it should be back after a reload, matching the fact that a reload
-   also drops you back onto the auto-picked event */
+/* Staying is in-memory only, so the prompt is back after a reload. Moving on is the
+   opposite: it is remembered (see autoEvent), and the finished event is then only reachable from
+   the menu, for review. */
 function nextEventOf(col){ return col.events.find(e=>e.id!==col.event.id && (e.startAt||0)>(col.event.startAt||0)) || null; }
 function allDoneOverlay(col){
   if(!allEventDone(col) || col.skipDismissed===col.event.id) return '';
@@ -1021,7 +1501,10 @@ function allDoneOverlay(col){
 function wireAllDone(col){
   const ao=body(col).querySelector('.allover'); if(!ao) return;
   const nb=ao.querySelector('.aonext');
-  if(nb) nb.onclick=async()=>{ const nx=nextEventOf(col); if(!nx) return; col.event=nx; await prepEvent(col); renderColumn(col); };
+  if(nb) nb.onclick=async()=>{ const nx=nextEventOf(col); if(!nx) return;
+    // the value is the event's last deadline, so pruneDone clears the mark with the other check-offs
+    doneState[movedKey(col.server,col.event.id)]=wrapEndOf(col.event,col.server); saveDone();
+    col.event=nx; await prepEvent(col); renderColumn(col); };
   const sb=ao.querySelector('.aostay');
   if(sb) sb.onclick=()=>{ col.skipDismissed=col.event.id; ao.remove(); };
   const rb=ao.querySelector('.aorefresh');
@@ -1029,6 +1512,9 @@ function wireAllDone(col){
 }
 /* re-evaluate after a check-off without rebuilding the whole column */
 function syncAllDone(col){
+  // unticking something on an event you had moved on from means it is not finished after all
+  const mk=movedKey(col.server,col.event.id);
+  if(doneState[mk] && !allEventDone(col)){ delete doneState[mk]; saveDone(); }
   const rg=body(col).querySelector('.rungs'); if(!rg) return;
   const ex=rg.querySelector('.allover'); if(ex) ex.remove();
   const html=allDoneOverlay(col);
@@ -1083,7 +1569,7 @@ function buildColumns(){
     `<section class="col" data-server="${s}" style="--accent-d:${SERVERS[s].accent};--accent-l:${SERVERS[s].accentLight}"><div class="col-body"></div></section>`).join('');
   columns = PREFS.servers.map(s=>({
     server:s, root:host.querySelector(`.col[data-server="${s}"]`),
-    events:[], event:null, vMatches:[], vshowId:'auto', eventGacha:null, otherGachas:[]
+    events:[], event:null, vMatches:[], vshowId:'auto', eventGacha:null
   }));
   columns.forEach(c=>hydrate(c.server));   // restore cached data first; loaders skip the network when present
   columns.forEach(initColumn);
@@ -1093,9 +1579,9 @@ async function initColumn(col){
   body(col).innerHTML = `<div class="cstat"><span class="spin"></span>${t('col.loading',{server:col.server})}</div>`;
   try{
     const c = await loadServer(col.server);
-    col.events = relevant(c.events);
+    col.events = relevant(c.events, col.server);
     if(!col.events.length){ renderEmpty(col); return; }
-    col.event = autoEvent(col.events);
+    col.event = autoEvent(col.events, col.server);
     await prepEvent(col);
     renderColumn(col);
   }catch(e){
@@ -1115,6 +1601,7 @@ function wireEmptyRefresh(col){
   btn.onclick=async()=>{ btn.disabled=true; btn.innerHTML=`<span class="spin"></span>${t('col.refreshing')}`; try{ await refreshCore(col); }catch(e){ btn.disabled=false; btn.textContent=t('col.retry'); } };
 }
 async function prepEvent(col){
+  await loadSpecials(col.server);
   const vl = await loadVlives(col.server);
   col.vMatches = matchVlives(vl, col.event);
   col.vshowId='auto';
@@ -1131,38 +1618,80 @@ async function doLoadGachas(col){
 
 /* gacha rows: classify + sort (ends in → permanent → starts in → ended → done), split visible vs folded */
 function gachaRows(col){
-  const n=now();
-  return (col.otherGachas||[]).map(g=>{
-    const gk=`${col.server}|G|${g.id}`, done=!!doneState[gk];
+  const n=now(), c=cache[col.server];
+  const list = c && c.gachas ? currentGachas(c.gachas, col.eventGacha ? col.eventGacha.id : null) : [];
+  // Free-to-play: banners that need real money (paid crystals only, or a Colorful+ subscription) go
+  const paidOff = !rowOn('paidgachas');
+  return list.filter(g=>!(paidOff && (g.k==='p' || g.k==='cp'))).map(g=>{
+    const gk=`${col.server}|G|${g.id}`, done=!!doneState[gk], gam=noCeil(col.server) && g.j===1;
     let rank;
     if(done) rank=4;
     else if(n<g.startAt) rank=2;                  // starts in
     else if(g.endAt-n>400*86400000) rank=1;       // permanent
     else if(n<g.endAt) rank=0;                    // ends in
     else rank=3;                                   // ended
-    return {g,gk,done,rank};
+    return {g,gk,done,rank,gam};
   }).sort((a,b)=> a.rank!==b.rank ? a.rank-b.rank
       : a.rank===2 ? a.g.startAt-b.g.startAt                 // starts: soonest start
       : (a.rank===0||a.rank===1) ? a.g.endAt-b.g.endAt       // ends/permanent: soonest end
       : b.g.endAt-a.g.endAt);                                // ended/done: most recent first
 }
 function gachaRowHtml(col,r){ const g=r.g;
-  return `<div class="grow${r.done?' done':''}" data-gkey="${r.gk}" data-end="${g.endAt}"><label class="gchklab"><input type="checkbox" class="gchk" ${r.done?'checked':''}><span class="gn mono">${g.name||t('g.unnamed')}</span></label><span class="gmeta"><span class="cd mono" data-start="${g.startAt}" data-end="${g.endAt}">${r.done?'✓ done':''}</span>${rowOn('cal')?`<span class="cal" data-end="${g.endAt}" data-label="${(g.name||t('g.unnamed')).replace(/"/g,'&quot;')} (gacha)">${t('rung.cal')}</span>`:''}</span></div>`;
+  return `<div class="grow${r.done?' done':''}" data-gkey="${r.gk}" data-end="${g.endAt}"><label class="gchklab"><input type="checkbox" class="gchk" ${r.done?'checked':''}>${artOn()?gachaArt(col.server,g.id,'gthumb'):''}<span class="gn mono">${g.name||t('g.unnamed')}</span></label><span class="gmeta"><span class="cd mono"${r.gam?' data-grey':''} data-start="${g.startAt}" data-end="${g.endAt}">${r.done?'✓ done':''}</span>${rowOn('cal')?`<span class="cal" data-ci="g:${g.id}">${t('rung.cal')}</span>`:''}</span></div>`;
 }
+/* "I don't have 90,000 crystals saved": per server, since each server is its own account */
+const noCeil = S => !!(PREFS.noCeil||{})[S];
 function gachaSectionHtml(col){
-  const rows=gachaRows(col);
+  const all=gachaRows(col), rows=all.filter(r=>!r.gam), gam=all.filter(r=>r.gam);
+  const c=cache[col.server];
+  // gacha data cached before V34 has no cost field; the switch can do nothing until it is refreshed
+  const oldFmt = noCeil(col.server) && c.gachas && c.gachas.length && !('j' in c.gachas[0]);
+  // and before V36 it has no kind field, so Free-to-play cannot tell the paid-only banners apart
+  const oldKind = !oldFmt && !rowOn('paidgachas') && c.gachas && c.gachas.length && !('k' in c.gachas[0]);
+  const ceilHtml = `<label class="tgl nceil"><input type="checkbox" class="nceilbox" ${noCeil(col.server)?'checked':''}><span>${t('g.noCeil')}</span></label>${
+    oldFmt?`<div class="nceilnote">${t('g.noCeilOld')}</div>`:''}${oldKind?`<div class="nceilnote">${t('g.paidOld')}</div>`:''}`;
+  /* The banners that take free crystals get their own list: folded, muted, with only the soonest
+     close showing, and a word about what pulling without a guarantee is before it opens. */
+  let gamHtml='';
+  if(gam.length){
+    const soon=gam.filter(r=>r.rank===0).sort((a,b)=>a.g.endAt-b.g.endAt)[0];
+    gamHtml=`<details class="dt gamble" data-dt="gamble"><summary>${t('g.gamble',{n:gam.length})}${
+      soon?`${t('g.gambleSoonest')}<span class="cd mono" data-grey data-end="${soon.g.endAt}"></span>`:''}</summary>
+      <div class="schlist">${gam.map(r=>gachaRowHtml(col,r)).join('')}</div></details>`;
+  }
   const vis=rows.filter(r=>r.rank<=1), fold=rows.filter(r=>r.rank>=2);
   const gStale = gachaAge(col.server)!=null && gachaAge(col.server)>STALE_GACHA;
   const visHtml = vis.length? vis.map(r=>gachaRowHtml(col,r)).join('') : `<div class="rnote" style="padding:7px 9px">${t('g.nothingLive')}</div>`;
   const foldHtml = fold.length? fold.map(r=>gachaRowHtml(col,r)).join('') : `<div class="rnote" style="padding:8px">${t('g.nothingFolded')}</div>`;
   /* The whole list is folded by default: gachas are spending-side context, not free-crystal
      acquisition, so they do not earn a place on the default surface. The refresh control stays
-     outside the fold, since a stale-gacha warning is useless if it is hidden. */
-  return `<div class="vh"><span>${t('g.other')}</span><span class="dim">${rows.length}</span></div>
-    <details class="dt"${PREFS.gachaFold?'':' open'}><summary>${PREFS.gachaFold? t('g.show',{n:rows.length}) : t('g.showN',{n:rows.length})}</summary>
-      <div class="glive">${visHtml}</div>
-      <details class="dt"><summary>${t('g.folded',{n:fold.length})}</summary><div class="schlist">${foldHtml}</div></details>
-    </details>`;
+     outside the fold, since a stale-gacha warning is useless if it is hidden.
+     Every number is labelled, and they add up: active + upcoming + ended + done = total. A gacha
+     that is running but checked off counts as done, which is where its row actually sits. */
+  const cnt=k=>rows.filter(r=>r.rank===k).length;
+  /* With the crystal switch on, what is left in this list is the banners that never touch free
+     crystals, so the fold says so: "Free & paid-only gachas", or just "Free gachas" when
+     Free-to-play has hidden the paid ones too. */
+  const nc=noCeil(col.server), paidOff=!rowOn('paidgachas');
+  const counts=t('g.counts',{active:vis.length, total:rows.length});
+  const sumHtml = nc ? `${t(paidOff?'g.safeFree':'g.safe')} · ${counts}` : counts;
+  const safeNote = nc ? `<div class="rnote gsafe">${t(paidOff?'g.safeNoteFree':'g.safeNote')}</div>` : '';
+  return `<div class="vh"><span>${t('g.other')}</span></div>${ceilHtml}
+    <details class="dt" data-dt="gacha"${PREFS.gachaFold?'':' open'}><summary>${sumHtml}</summary>
+      ${safeNote}<div class="glive">${visHtml}</div>
+      <details class="dt" data-dt="gfold"><summary>${t('g.folded',{up:cnt(2), ended:cnt(3), done:cnt(4)})}</summary><div class="schlist">${foldHtml}</div></details>
+    </details>${gamHtml}`;
+}
+function gambleWarn(onOk){
+  const wrap=document.createElement('div');
+  wrap.className='modal';
+  wrap.innerHTML=`<div class="modalbox helpbox"><h3>${t('gam.title')}</h3>${t('gam.body')}
+    <div class="mbtns"><button class="btn sm mno">${t('gam.no')}</button><button class="btn sm myes">${t('gam.ok')}</button></div></div>`;
+  document.body.appendChild(wrap);
+  const close=()=>wrap.remove();
+  wrap.querySelector('.mno').onclick=close;
+  wrap.querySelector('.myes').onclick=()=>{ close(); onOk(); };
+  wrap.onclick=e=>{ if(e.target===wrap) close(); };
 }
 function wireGacha(col){
   const gs=body(col).querySelector('.gsect'); if(!gs) return;
@@ -1172,16 +1701,74 @@ function wireGacha(col){
     saveDone();
     renderGachaSection(col);   // re-partition: checked items move into the fold
   });
-  gs.querySelectorAll('.cal').forEach(el=>el.onclick=()=>window.open(gcalURL(col, el.dataset.label, +el.dataset.end),'_blank'));
+  gs.querySelectorAll('.cal').forEach(el=>el.onclick=()=>openCal(col, el.dataset.ci));
+  const nb=gs.querySelector('.nceilbox');
+  if(nb) nb.onchange=()=>{ PREFS.noCeil=Object.assign({}, PREFS.noCeil, {[col.server]:nb.checked}); savePrefs(); renderColumn(col); };
+  // opening the list asks first, every time; closing it never does
+  const gd=gs.querySelector('details.gamble');
+  if(gd) gd.querySelector('summary').onclick=e=>{ if(gd.open) return; e.preventDefault(); gambleWarn(()=>{ gd.open=true; }); };
+  // a fold that opens shows rows that had no layout until now
+  gs.querySelectorAll('details').forEach(d=>d.addEventListener('toggle', ()=>{ if(d.open) fitGachaRows(d); }));
+  wireThumbPop(gs);
+  fitGachaRows(gs);
+  // a thumbnail that fails removes itself and gives its row more room: measure again afterwards
+  let refit=null; const later=()=>{ clearTimeout(refit); refit=setTimeout(()=>fitGachaRows(gs), 60); };
+  gs.addEventListener('error', later, true); gs.addEventListener('load', later, true);
   tickColumn(col);
 }
+/* Per row: is the gacha name taller than three lines beside its countdown? Then stack. Each row
+   is first measured unstacked, so widening the window can undo it. Rows inside a closed fold have
+   no layout and are measured when the fold opens. */
+function fitGachaRows(root){
+  root.querySelectorAll('.grow').forEach(row=>{
+    const gn=row.querySelector('.gn'); if(!gn || !gn.getClientRects().length) return;
+    row.classList.remove('stack');
+    // line-height may come back in px or as the bare 1.32 multiplier, depending on the engine
+    const cs=getComputedStyle(gn), fs=parseFloat(cs.fontSize)||13, raw=cs.lineHeight||'';
+    const lh = /px$/.test(raw) ? parseFloat(raw) : (parseFloat(raw)>0 ? parseFloat(raw)*fs : fs*1.32);
+    if(gn.getBoundingClientRect().height > lh*3.5) row.classList.add('stack');
+  });
+}
+/* mouse only: touch has no hover, and there the thumbnail stays part of the row's tap target */
+const canHover = () => !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+let popTimer=null;
+const POP_DELAY=700;   // long enough not to flash while the mouse crosses the list
+function wireThumbPop(root){
+  if(!canHover()) return;
+  root.querySelectorAll('img.gthumb').forEach(img=>{
+    img.addEventListener('mouseenter', ()=>{ clearTimeout(popTimer); popTimer=setTimeout(()=>showPop(img), POP_DELAY); });
+    img.addEventListener('mouseleave', hidePop);
+  });
+}
+function showPop(img){
+  if(!img.isConnected) return;
+  let pop=$('gpop');
+  if(!pop){ pop=document.createElement('div'); pop.id='gpop'; pop.className='gpop'; pop.innerHTML='<img alt="">'; document.body.appendChild(pop); }
+  pop.querySelector('img').src=img.src;
+  const r=img.getBoundingClientRect(), w=Math.min(360, window.innerWidth-24), h=w*208/488;
+  let y=r.bottom+8; if(y+h > window.innerHeight-8) y=r.top-h-16;
+  const x=Math.max(12, Math.min(r.left, window.innerWidth-w-20));
+  pop.style.left=x+'px'; pop.style.top=Math.max(8,y)+'px'; pop.style.width=w+'px';
+  pop.hidden=false;
+}
+function hidePop(){ clearTimeout(popTimer); const pop=$('gpop'); if(pop) pop.hidden=true; }
+window.addEventListener('scroll', hidePop, {passive:true});
+let fitTimer=null;
+window.addEventListener('resize', ()=>{ clearTimeout(fitTimer); fitTimer=setTimeout(()=>columns.forEach(c=>{ if(c.root) fitGachaRows(body(c)); }), 150); });
 function renderGachaSection(col){
   const gs=body(col).querySelector('.gsect'); if(!gs) return;
-  const det=gs.querySelector('details'); const open=det?det.open:false;
+  const folds=foldState(gs);
   gs.innerHTML=gachaSectionHtml(col);
-  const det2=gs.querySelector('details'); if(det2) det2.open=open;
+  restoreFolds(gs, folds);
   wireGacha(col);
 }
+
+/* Fold state is carried across a re-render by each fold's NAME. It used to go by position, so
+   when the new render had a different set of folds -- moving on to the next event when it has no
+   show schedule yet, say -- the gacha list's open state landed on the fold after it and "Also
+   upcoming · ended · done" sprang open by itself. */
+function foldState(root){ const m={}; root.querySelectorAll('details.dt[data-dt]').forEach(d=>{ m[d.dataset.dt]=d.open; }); return m; }
+function restoreFolds(root, m){ root.querySelectorAll('details.dt[data-dt]').forEach(d=>{ if(d.dataset.dt in m) d.open=m[d.dataset.dt]; }); }
 
 /* the picker + next-show timer + subsequent-show row + schedule, attached under the vshow rung */
 /* Compact hides the server-time cross-check line: it is the single widest thing in a column and
@@ -1202,8 +1789,8 @@ function buildVshowDetail(col, v, ev){
   const timer = (isCompact() && farOff) ? ''
     : `<div class="vb"><span class="nsk">${t('v.nextIn')}</span><span class="cd mono nextcd">—</span></div>`;
   const meta=`<div class="vmeta2">${t('v.meta',{start:fmtLocal(v._s0), last:fmtLocal(v._s1)})}</div>`;
-  const sched=v._sch.map((s,i)=>`<div class="schrow" data-start="${s.startAt}" data-end="${s.endAt}"><span class="seq mono">#${s.seq??i+1}</span><span class="mono">${fmtLocal(s.startAt)}${showSrv?` · ${SRV_LBL[col.server]} ${new Date(s.startAt).toLocaleString(dispLocale(),{timeZone:SRV_TZ[col.server],hour:'2-digit',minute:'2-digit',hour12:srvHour12(col.server)})}`:''}</span><span class="stat mono"></span></div>`).join('');
-  const details=`<details class="dt sub"><summary>${t('v.schedule',{n:v._sch.length})}</summary><div class="schlist">${sched}</div></details>`;
+  const sched=v._sch.map((s,i)=>`<div class="schrow" data-start="${s.startAt}" data-end="${s.endAt}"><span class="seq mono">#${s.seq??i+1}</span><span class="mono">${fmtLocal(s.startAt)}${showSrv?` · ${SRV_LBL[col.server]} ${new Date(s.startAt).toLocaleString(dispLocale(),{timeZone:SRV_TZ[col.server],hour:'2-digit',minute:'2-digit',hourCycle:hc(srvHour12(col.server))})}`:''}</span><span class="stat mono"></span></div>`).join('');
+  const details=`<details class="dt sub" data-dt="sched"><summary>${t('v.schedule',{n:v._sch.length})}</summary><div class="schlist">${sched}</div></details>`;
   return `<div class="vdetail">${picker}${timer}${meta}${details}</div>`;
 }
 
@@ -1211,6 +1798,9 @@ function renderColumn(col){
   const ev=col.event, st=statusOf(ev,col.server), c=cache[col.server];
   const showSrv = showSrvNow();   // shadows the global: compact suppresses the server-time line
   const rows = deadlinesFor(col);
+  // a tick made on the event gacha before V34 lived under an event-scoped key; carry it over once
+  const gr=rows.find(r=>r.key==='gacha');
+  if(gr){ const old=`${col.server}|${ev.id}|gacha`; if(doneState[old] && !doneState[gr.fk]){ doneState[gr.fk]=doneState[old]; delete doneState[old]; saveDone(); } }
   const rungHtml = rows.map(r=>{
     const startAttr = r.start? ` data-start="${r.start}"`:'';
     const done = isDone(col,r);
@@ -1228,11 +1818,11 @@ function renderColumn(col){
       }
     }
     const at = r.at ?? r.end;                       // the timestamp this row is actually about
-    const calLbl = (r.calLabel ?? r.label).replace(/"/g,'&quot;');
-    const main = `<div class="rung${done?' done':''}" data-key="${rowDoneKey(r)}" data-end="${r.end}">
-      <div class="rl"><label class="rlab"><input type="checkbox" class="rchk" ${done?'checked':''}><span class="rlabel"><span class="em">${r.em}</span>${r.label}${labelExtra}</span></label>${rowOn('cal')?`<span class="cal" data-end="${at}" data-label="${calLbl}">${t('rung.cal')}</span>`:''}</div>
-      ${r.note?`<div class="rnote">${r.note}</div>`:''}
-      <div class="rb"><span class="rt mono">${fmtLocal(at)}${showSrv?` · ${fmtSrv(at,col.server)}`:''}</span><span class="cd mono"${startAttr}${r.bare?' data-bare':''} data-end="${r.end}">${done?'✓ done':''}</span></div>
+    const art = r.key==='gacha' && artOn() ? gachaArt(col.server, r.gid, 'gart') : '';
+    const main = `<div class="rung${done?' done':''}${r.skip?' skipped':''}" data-key="${rowDoneKey(r)}" data-fk="${doneKey(col,r)}" data-end="${r.end}">
+      <div class="rl"><label class="rlab"><input type="checkbox" class="rchk" ${done?'checked':''}><span class="rlabel"><span class="em">${r.em}</span>${r.label}${labelExtra}</span></label>${rowOn('cal')?`<span class="cal" data-ci="r:${rowDoneKey(r)}">${t('rung.cal')}</span>`:''}</div>
+      ${r.note?`<div class="rnote">${r.note}</div>`:''}${r.skip?`<div class="rnote skipnote">${t('g.skipNote')}</div>`:''}${art}
+      <div class="rb"><span class="rt mono">${fmtLocal(at)}${showSrv?` · ${fmtSrv(at,col.server)}`:''}</span><span class="cd mono"${startAttr}${r.bare?' data-bare':''}${r.skip?' data-grey':''} data-end="${r.end}">${done?'✓ done':''}</span></div>
       ${rungExtra}
     </div>`;
     let subs='';
@@ -1240,7 +1830,8 @@ function renderColumn(col){
       const ep=(c.episodes||{})[ev.id]||0;
       let items='';
       const subDefs = [
-        ['episodes',    ep>0?t('task.episodesN',{n:ep}):t('task.episodes'), t('task.episodesShort',{n:ep})],
+        ['episodes',    ep>0?t('task.episodesN',{n:ep}):t('task.episodes'),
+                        ep>0?t('task.episodesShort',{n:ep}):t('task.episodesShort0')],
         ['combo10',     t('task.combo10'),     t('task.combo10Short')],
         ['finalreward', t('task.finalreward'), t('task.finalrewardShort')],
       ].filter(([k])=>rowOn(k));
@@ -1280,21 +1871,31 @@ function renderColumn(col){
   // the server clock rides along on the cache line, so it costs no extra vertical space, and it
   // is gated on the same toggle as the other server-time readouts
   const gStaleTop = gachaAge(col.server)!=null && gachaAge(col.server)>STALE_GACHA;
+  /* V32: each age IS its refresh button. The separate "DB 1m ago · gacha 1m ago" text and the
+     small "↻ DB" / "↻ gacha" buttons said the same thing twice; merged, the tap targets are
+     bigger and nothing is lost. */
   const cacheLine = `<div class="cacheline">
-    <span class="ages"><span class="age-core${coreStale?' stale':''}">${t('col.db',{age:ageStr(fa.core)})}</span>${
-      fa.gachas?` · <span class="age-gacha${gStaleTop?' stale':''}">${t('col.gachaAge',{age:ageStr(fa.gachas)})}</span>`:''}</span>
+    <span class="cachebtns"><button class="btn xs refresh${coreStale?' stale':''}">↻ <span class="age-core">${t('col.db',{age:ageStr(fa.core)})}</span></button>${
+      c.gachas?`<button class="btn xs grefresh${gStaleTop?' stale':''}">↻ <span class="age-gacha">${t('col.gachaAge',{age:ageStr(fa.gachas)})}</span></button>`:''}</span>
     ${showSrv?'<span class="srvclock mono"></span>':''}
-    <span class="cachebtns"><button class="btn xs refresh${coreStale?' stale':''}">${t('col.refreshDb')}</button>${
-      c.gachas?`<button class="btn xs grefresh${gStaleTop?' stale':''}">${t('col.refreshGacha')}</button>`:''}</span>
   </div>`;
 
   /* extras: recurring resets + ranked season. Both mission-pass rows hang off the same monthly
      reset but carry distinct task suffixes, so buying the pass and finishing it are separate
      check-offs that reset together each month. */
-  const passReset = nextMonthlyReset(SRV_TZ[col.server]);
+  const passReset = passResetAt(col.server);
+  /* V34 moved the reset from a guessed 04:00 on the 1st to the real start of the next live-mission
+     month (00:00 server time). A tick stored under the old 04:00 key of the same month is carried
+     over; the 1-day bound keeps last month's tick from leaking in during the hours between them. */
+  const oldReset = nextMonthlyReset(SRV_TZ[col.server]);
+  if(oldReset!==passReset && Math.abs(oldReset-passReset)<86400000) for(const k of ['pass','passdone']){
+    const o=`${col.server}|${k}|${oldReset}`, nk=`${col.server}|${k}|${passReset}`;
+    if(doneState[o] && !doneState[nk]){ doneState[nk]=passReset; delete doneState[o]; saveDone(); }
+  }
   let extras='';
   if(rowOn('pass')) extras += checkRow(`${col.server}|pass|${passReset}`, t('x.pass'), passReset, {ddl:true});
   if(rowOn('passdone')) extras += checkRow(`${col.server}|passdone|${passReset}`, t('x.passdone'), passReset, {ddl:true});
+  if(rowOn('mpadv')) extras += mpHtml(col);
   const wb=SERVERS[col.server].quirks.weeklyBadge;   // CN today; the mechanism is server-agnostic
   if(wb && rowOn('badge')){ const wk=nextWeekly(SRV_TZ[col.server],wb.weekday,wb.hour); extras += checkRow(`${col.server}|badge|${wk}`, wb.label, wk, {ddl:true}); }
   /* Ranked is a crystal row, not a "season ends" notice: 150-300 crystals land once you have
@@ -1302,10 +1903,27 @@ function renderColumn(col){
      The key is unchanged, so it still auto-resets per season. */
   const rs=currentSeason(col);
   if(rs && rowOn('rank')) extras += checkRow(`${col.server}|rank|${rs.id}`, t('x.rank',{season:rs.name}), rs.aggregatedAt, {ddl:true});
+  /* Connect Live: the paid streamed concerts ("streaming" virtual lives). They never counted toward
+     the virtual-show rung, which is about free shows. Listed from announcement to the last show. */
+  if(rowOn('clive')) for(const v of (c.vlives||[]).filter(v=>v.virtualLiveType==='streaming')){
+    const w=cliveWindow(v); if(!w) continue; const n=now();
+    if(!(w.from<=n && n<w.last)) continue;
+    const times=w.sch.map(x=>fmtTime(x.startAt)).join(', ');
+    extras += checkRow(`${col.server}|clive|${v.id}`,
+      `${t('x.clive',{name:esc(v.name)})}<span class="inote">${t('x.cliveNote',{day:fmtDay(w.first), times})}</span>`,
+      w.last, {ddl:true, sch:w.sch.map(x=>`${x.startAt}-${x.endAt||''}`).join(',')});
+  }
   const extrasHtml = extras ? `<div class="sect"><div class="vh">${t('x.extras')}</div><div class="subwrap">${extras}</div></div>` : '';
 
+  /* a newer event is live while this column holds an older one (usually because something on it
+     is ticked and its exchange is open): say so, and offer to move on without ticking the rest */
+  const ln=liveNextOf(col);
+  const hint = ln && !allEventDone(col) ? `<div class="livehint"><span>${t('hint.live',{name:esc(ln.name)})}</span>
+      <button type="button" class="btn xs hintgo">${t('hint.go')}</button>${
+      st.k==='wrap' && hasChecks(col.server,ev.id) ? `<span class="why">${t('hint.why',{when:fmtLocal(wrapEndOf(ev,col.server))})}</span>`:''}</div>` : '';
+
   // this render can now be triggered by the ticker, so don't silently collapse the user's folds
-  const openDt = [...body(col).querySelectorAll('details.dt')].map(d=>d.open);
+  const openDt = foldState(body(col));
   col.renderSig = renderSig(col);
 
   body(col).innerHTML = `
@@ -1314,22 +1932,28 @@ function renderColumn(col){
       <span class="cstatus ${st.k}">${st.t}</span></div>
     <div class="emeta">${t('rung.meta',{type:etypeName(ev.eventType), when:fmtLocal(ev.startAt)})}</div>
     ${cacheLine}
+    ${hint}${artOn() && ev.ab ? artImg(col.server, `home/banner/${ev.ab}/${ev.ab}.webp`, 'evart') : ''}
     <div class="rungs">${rungHtml}${allDoneOverlay(col)}</div>
-    ${gHtml}${extrasHtml}
+    ${spHtml(col)}${gHtml}${extrasHtml}
     ${rowOn('ics')?`<div class="cexport"><button class="btn sm eics">${t('e.ics')}</button></div>`:''}`;
 
   // wire
   const b=body(col);
-  b.querySelectorAll('details.dt').forEach((d,i)=>{ if(openDt[i]) d.open=true; });
+  restoreFolds(b, openDt);
   const grf=b.querySelector('.cachebtns .grefresh');
-  if(grf) grf.onclick=async()=>{ grf.disabled=true; grf.innerHTML=`<span class="spin"></span>`; try{ await refreshGachas(col); }catch(e){ grf.disabled=false; grf.textContent=t('col.refreshGacha'); } };
+  if(grf) grf.onclick=async()=>{ grf.disabled=true; grf.innerHTML=`<span class="spin"></span>${t('col.refreshing')}`; try{ await refreshGachas(col); }catch(e){ grf.disabled=false; grf.textContent=t('col.retry'); } };
   const rf=b.querySelector('.refresh'); if(rf) rf.onclick=async()=>{ rf.disabled=true; rf.innerHTML=`<span class="spin"></span>${t('col.refreshing')}`; try{ await refreshCore(col); }catch(e){ rf.disabled=false; rf.textContent=t('col.retry'); } };
   b.querySelector('.epick').onchange = async e=>{ col.event=col.events.find(x=>String(x.id)===e.target.value); await prepEvent(col); renderColumn(col); };
   const vsel=b.querySelector('.vsel'); if(vsel){ vsel.value=col.vshowId; vsel.onchange=e=>{col.vshowId=e.target.value; renderColumn(col);}; }
   const gl=b.querySelector('.gload'); if(gl) gl.onclick=()=>doLoadGachas(col);
-  b.querySelectorAll('.rl .cal').forEach(el=>el.onclick=e=>{ e.preventDefault(); window.open(gcalURL(col, el.dataset.label, +el.dataset.end),'_blank'); });
+  b.querySelectorAll('.rl .cal').forEach(el=>el.onclick=e=>{ e.preventDefault(); openCal(col, el.dataset.ci); });
+  const hg=b.querySelector('.hintgo');
+  if(hg) hg.onclick=async()=>{ const nx=liveNextOf(col); if(!nx) return;
+    doneState[movedKey(col.server,col.event.id)]=wrapEndOf(col.event,col.server); saveDone();
+    col.event=nx; await prepEvent(col); renderColumn(col); };
+  wireMP(col);
   b.querySelectorAll('.rchk').forEach(chk=>chk.onchange=e=>{
-    const rung=e.target.closest('.rung'), key=`${col.server}|${col.event.id}|${rung.dataset.key}`;
+    const rung=e.target.closest('.rung'), key=rung.dataset.fk;
     if(e.target.checked){ doneState[key]=+rung.dataset.end; } else { delete doneState[key]; }
     saveDone();
     rung.classList.toggle('done', e.target.checked);
@@ -1343,6 +1967,7 @@ function renderColumn(col){
     if(on) doneState[key]=+el.dataset.end; else delete doneState[key];
     saveDone();
     el.classList.toggle('done', on); el.setAttribute('aria-pressed', String(on));
+    if(el.closest('.pmc')){ renderColumn(col); return; }   // a stamp page: the "n of m pages" count
     syncAllDone(col);
   });
   b.querySelectorAll('.ichk').forEach(chk=>chk.onchange=e=>{
@@ -1352,6 +1977,7 @@ function renderColumn(col){
     item.classList.toggle('done', e.target.checked);
     const cd=item.querySelector('.cd');
     if(cd){ if(e.target.checked){ cd.textContent='✓ done'; cd.className='cd mono c-done'; } else { tickEl(cd); } }
+    if(item.closest('.pmc')){ renderColumn(col); return; }   // the "n of m pages" count
     if(item.classList.contains('sub')) syncAllDone(col);
   });
   const eics=b.querySelector('.eics'); if(eics) eics.onclick=()=>exportIcs(col);
@@ -1370,20 +1996,179 @@ function refreshCacheLine(col){
   const coreStale = coreAge(col.server) > STALE_CORE;
   const ga = gachaAge(col.server), gStale = ga!=null && ga > STALE_GACHA;
   const ac=cl.querySelector('.age-core');
-  if(ac){ const txt=t('col.db',{age:ageStr(fa.core)}); if(ac.textContent!==txt) ac.textContent=txt; ac.classList.toggle('stale', coreStale); }
+  if(ac){ const txt=t('col.db',{age:ageStr(fa.core)}); if(ac.textContent!==txt) ac.textContent=txt; }
   const ag=cl.querySelector('.age-gacha');
-  if(ag){ const txt=t('col.gachaAge',{age:ageStr(fa.gachas)}); if(ag.textContent!==txt) ag.textContent=txt; ag.classList.toggle('stale', gStale); }
+  if(ag){ const txt=t('col.gachaAge',{age:ageStr(fa.gachas)}); if(ag.textContent!==txt) ag.textContent=txt; }
   // a button mid-refresh is disabled and showing a spinner; leave it alone until it finishes
   const rb=cl.querySelector('.refresh');   if(rb && !rb.disabled) rb.classList.toggle('stale', coreStale);
   const gb=cl.querySelector('.grefresh');  if(gb && !gb.disabled) gb.classList.toggle('stale', gStale);
 }
 
+/* ---------- artwork (Comfortable view, opt-in) ----------
+   Straight from the community asset mirror, by the names in the master DB. A missing image removes
+   itself rather than leaving a broken-image box: new events reach the mirror a little late. */
+const ART_BASE = 'https://storage.sekai.best/';
+const artOn = () => !isCompact() && PREFS.art===true;
+const artImg = (S, path, cls) => `<img class="${cls}" src="${ART_BASE}${SERVERS[S].assets}/${path}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`;
+const gachaArt = (S, id, cls) => artImg(S, `home/banner/banner_gacha${id}/banner_gacha${id}.webp`, cls);
+
+const fmtDay = ts => new Date(ts).toLocaleDateString(dispLocale(),{month:'short',day:'numeric'});
+const fmtTime = ts => new Date(ts).toLocaleTimeString(dispLocale(),{hour:'2-digit',minute:'2-digit',hourCycle:hc(localHour12())});
+const NUMF = new Intl.NumberFormat('en-US');   // thousands separators to match the English interface
+const nfmt = x => NUMF.format(Math.round(x));
+
+/* ---------- stamp missions & limited-time shops (their own block, between the event and gachas) ---------- */
+const SP_LEAD = 3*86400000;   // listed this long before they open
+function spHtml(col){
+  const S=col.server, c=cache[S], n=now(); let h='';
+  if(rowOn('stamps')) for(const pm of (c.pm||[]).filter(x=>x.startAt-SP_LEAD<=n && n<x.closedAt).sort((a,b)=>a.prog-b.prog)){
+    const ended = n>=pm.prog, target = ended ? pm.closedAt : pm.prog;
+    const keys=pm.pages.map(p=>`${S}|PM|${p.id}`), d=keys.filter(k=>doneState[k]).length;
+    /* one chip per page, like the event's "8 story eps" chips, in both densities (V37): page names
+       are short, and a full checkbox row each took a lot of height. They wrap onto more rows as
+       needed; past 8 pages they fold. */
+    const pages=`<div class="tchips pmchips">${pm.pages.map((p,i)=>{ const dn=!!doneState[keys[i]];
+      return `<button type="button" class="tchip${dn?' done':''}" data-key="${keys[i]}" data-end="${pm.closedAt}" aria-pressed="${dn}">${esc(p.name)}</button>`;
+    }).join('')}</div>`;
+    const notes=[pm.pages.length===1 ? t('sp.ticked1',{d}) : t('sp.ticked',{d, n:pm.pages.length})];
+    if(ended) notes.push(t('sp.claimNow'));
+    else if(pm.closedAt-pm.prog > 3600000) notes.push(t('sp.claim',{closed:fmtLocal(pm.closedAt)}));
+    h+=`<div class="pmc" data-pm="${pm.id}"><div class="pmh"><span class="pmn">${esc(pm.name)}</span><span class="cd mono" data-start="${pm.startAt}" data-end="${target}"></span></div>
+      <div class="rnote">${notes.join(' · ')}</div>${pm.pages.length>8
+        ? `<details class="dt sub" data-dt="pm${pm.id}"><summary>${t('sp.pages',{n:pm.pages.length})}</summary>${pages}</details>`
+        : pages}</div>`;
+  }
+  if(rowOn('mexchange')){
+    // shops closing at the same moment are one row: an anniversary opens five or thirty at once
+    const by={};
+    (c.mx||[]).filter(x=>x.startAt-SP_LEAD<=n && n<x.endAt).forEach(x=>{ (by[x.endAt]=by[x.endAt]||[]).push(x); });
+    Object.keys(by).map(Number).sort((a,b)=>a-b).forEach(end=>{
+      const g=by[end].sort((a,b)=>a.id-b.id);
+      const names=g.slice(0,3).map(x=>esc(x.name)).join(' · ') + (g.length>3 ? ' '+t('sp.more',{n:g.length-3}) : '');
+      const start=Math.min(...g.map(x=>x.startAt));
+      h+=checkRow(`${S}|MX|${g[0].id}`, t('sp.shop',{names}), end, {ddl:true, start: start>n ? start : 0});
+    });
+  }
+  return h ? `<div class="sect spsect"><div class="vh">${t('sp.title')}</div>${h}</div>` : '';
+}
+
+/* ---------- mission-pass progress advisor ----------
+   The pass is the monthly live mission: points from playing shows fill 100-point tiers. The user
+   enters their points; the pace is measured from the month's start to WHEN they entered it, so an
+   old entry does not look like stalled progress. Colorful Pass doubles live points. */
+function mpEntry(S){ const p=curPeriod(S), e=(PREFS.mp||{})[S]; return p && e && e.pid===p.id ? e : null; }
+function mpMax(S){ const p=curPeriod(S); return p && (cache[S].lmMax||{})[p.id] || null; }
+const mpVal = (pts,M) => t('mp.val',{p:nfmt(pts), max:nfmt(M), tier:Math.floor(pts/100), tiers:Math.floor(M/100)});
+function mpHtml(col){
+  const S=col.server, p=curPeriod(S); if(!p) return '';
+  const M=mpMax(S)||12000, e=mpEntry(S), cp=!!((PREFS.mp||{})[S]||{}).cp;
+  const pts=e ? Math.min(e.pts, M) : 0;
+  return `<div class="mpadv" data-pid="${p.id}">
+    <div class="mphead"><span>${t('x.mp')}</span><span class="mpval mono">${mpVal(pts,M)}</span></div>
+    <input type="range" class="mpslider" min="0" max="${M}" step="100" value="${pts}" aria-label="${t('mp.aria')}">
+    ${rowOn('cplus')?`<label class="tgl mpcp"><input type="checkbox" class="mpcpbox" ${cp?'checked':''}><span>${t('mp.cp')}</span></label>`:''}
+    <div class="mpverdict"></div>
+    ${rowOn('cplus')?`<button type="button" class="btn xs mpwhat" aria-pressed="${!!col.mpWhatIf}" hidden>${t('mp.whatIf')}</button>
+    <div class="mpverdict mpwif" hidden></div>`:''}
+    <div class="mpasof"></div></div>`;
+}
+/* Two different questions about Colorful+, kept apart:
+     "I already have it"  -> the pace so far already counts the 2x, so nothing is added to it
+     "What if I buy it now" -> from now on the same play earns twice the points: the current points
+                              (estimated forward from the entry at the measured pace) plus 2x pace */
+function mpVerdict(S){
+  const p=curPeriod(S); if(!p) return null;
+  const c=cache[S], max=mpMax(S), M=max||12000, e=mpEntry(S);
+  const D=86400000, n=now(), end=p.endAt+1000, left=Math.max(end-n, 3600000);
+  const maxNote = max ? '' : (c.lmLoading ? t('mp.maxLoading') : t('mp.maxAssumed',{max:nfmt(M)}));
+  if(!e) return {cls:'', html:t('mp.unset'), asof:maxNote};
+  const pts=Math.min(e.pts,M), at=Math.min(e.at,n), el=at-p.startAt;
+  // with the Colorful+ options switched off (Free-to-play), a remembered "I have it" is ignored too
+  const cpOn=rowOn('cplus'), owned=cpOn && e.cp;
+  let cls, html, wif=null;
+  if(pts>=M){ cls='done'; html=t('mp.done'); }
+  else if(pts<=0 || el<6*3600000){ cls='info'; html=t('mp.early',{d:nfmt((M-pts)/(left/D))}); }
+  else {
+    const r=pts/el, finish=p.startAt+M/r;
+    if(finish<=end-3*D){ cls='ahead'; html=t('mp.ahead',{date:fmtDay(finish)}); }
+    else if(finish<=end){ cls='track'; html=t('mp.track',{date:fmtDay(finish)}); }
+    else {
+      const proj=Math.min(M, pts + r*(end-at)), need=(M-pts)/(left/D), pace=r*D;
+      cls='behind';
+      html=t('mp.behind',{proj:nfmt(proj), max:nfmt(M), short:nfmt(M-proj), need:nfmt(need), pace:nfmt(pace)})
+        + (owned ? ' '+t('mp.cpIn') : '');
+    }
+    if(cpOn && !owned && cls!=='ahead'){
+      const ptsNow=Math.min(M, pts + r*(n-at)), fin2=n + (M-ptsNow)/(2*r);
+      wif = fin2<=end ? t('mp.wifFinish',{date:fmtDay(fin2)})
+          : (()=>{ const proj2=Math.min(M, ptsNow + 2*r*(end-n)); return t('mp.wifShort',{proj:nfmt(proj2), max:nfmt(M), short:nfmt(M-proj2)}); })();
+    }
+  }
+  return {cls, html, wif, asof: t('mp.asOf',{age:ageStr(e.at), end:fmtDay(end-1000)}) + (maxNote?' '+maxNote:'')};
+}
+/* the verdict is redrawn from the ticker, but only touched when its text actually changes */
+function mpUpdate(col){
+  const box=body(col).querySelector('.mpadv'); if(!box) return;
+  const v=mpVerdict(col.server); if(!v) return;
+  const vd=box.querySelector('.mpverdict'), as=box.querySelector('.mpasof');
+  if(vd.innerHTML!==v.html) vd.innerHTML=v.html;
+  vd.className='mpverdict '+v.cls;
+  if(as.textContent!==v.asof) as.textContent=v.asof;
+  // the what-if button only appears where it can say something: a pace exists and Colorful+ is not owned
+  const wb=box.querySelector('.mpwhat'), wv=box.querySelector('.mpwif');
+  if(!wb || !wv) return;   // Colorful+ options switched off
+  wb.hidden = !v.wif;
+  wv.hidden = !v.wif || !col.mpWhatIf;
+  if(v.wif && wv.innerHTML!==v.wif) wv.innerHTML=v.wif;
+}
+function setMP(S, patch){
+  const p=curPeriod(S); if(!p) return;
+  const e=(PREFS.mp||{})[S]||{}, same=e.pid===p.id;
+  const next={pid:p.id, pts: same ? (e.pts||0) : 0, at: same && e.at ? e.at : now(), cp:!!e.cp};
+  if('pts' in patch){ next.pts=patch.pts; next.at=now(); }
+  if('cp' in patch) next.cp=patch.cp;
+  PREFS.mp=Object.assign({}, PREFS.mp, {[S]:next});
+  if(!SIM) savePrefs();   // the sandbox restores PREFS.mp on closing
+}
+function wireMP(col){
+  const box=body(col).querySelector('.mpadv'); if(!box) return;
+  const S=col.server, sl=box.querySelector('.mpslider'), cb=box.querySelector('.mpcpbox');
+  const c=cache[S];
+  // the tier count is fetched the first time the advisor is actually used this month
+  const ensure=()=>{ if(!mpMax(S) && !c.lmLoading && !c.lmDeclined && !c.lmFailed)
+    loadLMMax(S).then(()=>{ if(mpMax(S)) renderColumn(col); else mpUpdate(col); }); };
+  sl.addEventListener('pointerdown', ensure); sl.addEventListener('focus', ensure);
+  sl.oninput=()=>{ box.querySelector('.mpval').textContent=mpVal(+sl.value, +sl.max); };
+  sl.onchange=()=>{ setMP(S,{pts:+sl.value}); mpUpdate(col); };
+  // the Colorful+ controls are absent when Free-to-play switched them off
+  if(cb) cb.onchange=()=>{ setMP(S,{cp:cb.checked}); mpUpdate(col); };
+  const wb=box.querySelector('.mpwhat');
+  if(wb) wb.onclick=()=>{ col.mpWhatIf=!col.mpWhatIf; wb.setAttribute('aria-pressed', String(col.mpWhatIf)); mpUpdate(col); };
+  if(mpEntry(S)) ensure();
+  mpUpdate(col);
+}
+
 /* ---------- live timers ---------- */
+/* A Connect Live is a day of showings, not a deadline: "starts in" before the first, a red
+   "ongoing" while one is on (its listed length, or 45 minutes if the data has none), and between
+   showings an orange countdown to the next run, which reads "last run in" when no other is left. */
+const SHOW_GUESS = 45*60000;
+function tickShows(el, set){
+  const n=now(), DAY=86400000;
+  const runs=el.dataset.sch.split(',').map(x=>{ const [a,b]=x.split('-'); const s0=+a, e0=+b; return {s:s0, e: e0>s0 ? e0 : s0+SHOW_GUESS}; });
+  const on=runs.find(r=>r.s<=n && n<r.e);
+  if(on) return set(t('cd.ongoing',{t:spanFor(on.e-n)}), 'c-urgent', true);
+  const next=runs.find(r=>r.s>n);
+  if(!next) return set(t('cd.ended'),'c-gone',false);
+  if(next===runs[0]) return set(t('cd.startsIn')+spanFor(next.s-n), 'c-soon', next.s-n<DAY);
+  return set((next===runs[runs.length-1] ? t('cd.lastRun') : t('cd.nextRun'))+spanFor(next.s-n), 'c-warn', true);
+}
 function tickEl(el){
   const n=now(), start=el.dataset.start?+el.dataset.start:null, end=+el.dataset.end;
   const grey=el.hasAttribute('data-grey');   // low-priority rows stay muted regardless of urgency
   const bare=el.hasAttribute('data-bare');   // the row's own label already says "starts in"
   const set=(txt,cls,chip)=>{ el.textContent=txt; el.className='cd mono '+cls+(chip?' chip':''); };
+  if(el.dataset.sch) return tickShows(el, set);
   const DAY=24*3600000;
   // a chip marks "act on this soon": <=3 days to a deadline, or a start inside 24h
   if(start!==null && n<start){ const d=start-n;
@@ -1402,6 +2187,7 @@ function tickColumn(col){
   if(root.querySelector('.rungs') && col.renderSig!==undefined && renderSig(col)!==col.renderSig){ renderColumn(col); return; }
   const sc=root.querySelector('.srvclock'); if(sc) sc.textContent=srvClock(col.server);
   refreshCacheLine(col);
+  mpUpdate(col);
   root.querySelectorAll('.cd[data-end]').forEach(el=>{ if(el.classList.contains('nextcd')) return; const host=el.closest('.rung,.grow,.citem'); if(host&&host.classList.contains('done')&&!el.hasAttribute('data-grey')) return; tickEl(el); });
   const v=selectedVlive(col), ncd=root.querySelector('.nextcd'), nsk=root.querySelector('.nsk');
   if(v&&ncd){
@@ -1419,36 +2205,329 @@ function tickColumn(col){
     else { stat.textContent=t('v.in',{t:hms(s-n)}); if(!markedNext){ row.classList.add('next'); markedNext=true; } }
   });
 }
-setInterval(()=>{ columns.forEach(c=>{ if(c.event) tickColumn(c); }); }, 1000);
+setInterval(()=>{ columns.forEach(c=>{ if(c.event) tickColumn(c); }); ttTick(); }, 1000);
 
-/* ---------- exports ---------- */
+/* ---------- time travel (Settings -> Testing) ----------
+   A way to check behaviour without waiting for real time to pass: the status badge flipping at
+   the event's end, which event a reload lands on, a gacha moving into the fold. It moves only the
+   page's clock (TIME_SHIFT); the data is whatever is cached. It is also a sandbox: the real
+   check-offs are set aside on opening and put back on closing, so ticking everything to see the
+   "next event" prompt costs nothing. */
+function ttOpen(){
+  if(SIM) return;
+  SIM={done:JSON.stringify(doneState), mp:JSON.stringify(PREFS.mp||{})};
+  document.body.classList.add('tt-on');
+  renderTT();
+}
+async function ttClose(){
+  if(!SIM) return;
+  doneState=JSON.parse(SIM.done); PREFS.mp=JSON.parse(SIM.mp); savePrefs(); SIM=null; TIME_SHIFT=0;
+  $('tt').hidden=true; $('tt').innerHTML='';
+  document.body.classList.remove('tt-on');
+  renderSettings();
+  await retime({reopen:true});
+}
+/* Re-evaluate every column for the current (possibly shifted) clock.
+     reopen  what a fresh page load at this moment would show: the default event is re-picked
+     pick    {EN: eventId} forces that event in that column
+     neither time simply passed with the page open: the selected event stays while it is listed */
+async function retime(o){
+  o=o||{};
+  for(const col of columns){
+    const c=cache[col.server]; if(!c || !c.events) continue;
+    col.events=relevant(c.events, col.server);
+    if(!col.events.length){ col.event=null; renderEmpty(col); continue; }
+    const pick = o.pick && o.pick[col.server]!=null && col.events.find(e=>e.id===o.pick[col.server]);
+    const keep = !o.reopen && col.event && col.events.find(e=>e.id===col.event.id);
+    col.event = pick || keep || autoEvent(col.events, col.server);
+    if(o.reopen) col.skipDismissed=null;   // "Stay here" does not survive a reload either
+    await prepEvent(col); renderColumn(col);
+  }
+}
+async function setSimTime(ts, o){ if(!SIM) ttOpen(); TIME_SHIFT = ts - Date.now(); await ttEnsureHistory(); await retime(o); ttSync(); ttTick(); }
+/* The stored virtual-show schedules reach 30 days back. Going further fetches the file again,
+   slimmed to 130 days back, and keeps it in memory for this session only -- never in storage. */
+async function ttEnsureHistory(){
+  if(!SIM || now() > realNow()-28*86400000 || !rowOn('vshow')) return;
+  SIM.vl=SIM.vl||{};
+  const need=columns.filter(c=>cache[c.server] && !SIM.vl[c.server]); if(!need.length) return;
+  ttStatus(t('tt.loadOld'));
+  await Promise.all(need.map(async col=>{ const s=col.server;
+    try{
+      if(!await confirmFetch(s,'vlives')){ SIM.vl[s]=cache[s].vlives||[]; return; }
+      const r=await fetch(`${RAW(s)}/virtualLives.json`,{cache:'no-store'});
+      SIM.vl[s] = r.ok ? slimVlives(await r.json(), realNow()-130*86400000, realNow()+150*86400000) : (cache[s].vlives||[]);
+    }catch{ SIM.vl[s]=cache[s].vlives||[]; }
+  }));
+  ttStatus(t('tt.loadedOld'));
+}
+function ttStatus(msg){ const el=$('tt') && $('tt').querySelector('.ttload'); if(el) el.textContent=msg; }
+/* the moments worth watching, per server and event, for the "jump to" list */
+function ttMoments(){
+  const out=[], lo=realNow()-125*86400000, hi=realNow()+60*86400000;
+  for(const col of columns){
+    const S=col.server, c=cache[S]; if(!c || !c.events) continue;
+    c.events.filter(e=>wrapEndOf(e,S)>lo && e.startAt<hi).sort((a,b)=>a.startAt-b.startAt).forEach(e=>{
+      const m=[[t('tt.m.start'),e.startAt],[t('tt.m.end'),e.aggregateAt]];
+      (c.vlives ? matchVlives(c.vlives,e) : []).forEach(v=>{ const kind=kindLabel(vliveKind(v,e));
+        m.push([t('tt.m.vfirst',{kind}),v._s0],[t('tt.m.vlast',{kind}),v._s1]); });
+      const x=exchangeEnd(S,e); if(x) m.push([t('tt.m.exch'),x]);
+      m.push([t('tt.m.gone'), wrapEndOf(e,S)+4*86400000]);
+      out.push({S, e, m:m.sort((a,b)=>a[1]-b[1])});
+    });
+    // stamp missions, shops and Connect Live are not tied to an event: one group per server
+    const xm=[];
+    (c.pm||[]).forEach(x=>xm.push([t('tt.m.pmEnd',{name:x.name}), x.prog]));
+    (c.mx||[]).forEach(x=>xm.push([t('tt.m.mxEnd',{name:x.name}), x.endAt]));
+    (c.vlives||[]).filter(v=>v.virtualLiveType==='streaming').forEach(v=>{ const w=cliveWindow(v); if(!w) return;
+      xm.push([t('tt.m.cliveStart',{name:v.name}), w.first],[t('tt.m.cliveEnd',{name:v.name}), w.last]); });
+    const xs=xm.filter(([,ts])=>ts>lo && ts<hi).sort((a,b)=>a[1]-b[1]);
+    if(xs.length) out.push({S, e:{id:'', name:t('tt.g.extras')}, m:xs});
+  }
+  return out;
+}
+const TT_NUDGE=[[-1440,'−1d'],[-60,'−1h'],[-1,'−1m'],[1,'+1m'],[60,'+1h'],[1440,'+1d']];
+function renderTT(){
+  const host=$('tt'); host.hidden=false;
+  const jumps=ttMoments().map(g=>`<optgroup label="${esc(g.S+' · '+g.e.name)}">${g.m.map(([label,ts])=>
+    `<option value="${ts}|${g.S}|${g.e.id}">${esc(label)} · ${fmtLocal(ts)}</option>`).join('')}</optgroup>`).join('');
+  host.innerHTML=`<div class="ttbar">
+    <div class="ttrow"><b>${t('tt.title')}</b><span class="ttnow mono"></span><span class="ttoff"></span>
+      <button type="button" class="btn xs ttexit">${t('tt.exit')}</button><button type="button" class="btn xs ttx" aria-label="${t('tt.exit')}">×</button></div>
+    <div class="ttrow"><span class="ttedge">${t('tt.min')}</span>
+      <input type="range" class="ttslider" min="-2880" max="1440" step="1" value="0" aria-label="${t('tt.sliderAria')}">
+      <span class="ttedge">${t('tt.max')}</span></div>
+    <div class="ttrow">${TT_NUDGE.map(([m,l])=>`<button type="button" class="btn xs ttn" data-m="${m}">${l}</button>`).join('')}
+      <input type="datetime-local" class="ttdt" aria-label="${t('tt.dtAria')}">
+      <select class="ttjump"><option value="">${t('tt.jump')}</option>${jumps}</select>
+      <button type="button" class="btn xs ttreopen">${t('tt.reopen')}</button></div>
+    <div class="ttrow ttnote">${t('tt.sandbox')} <span class="ttload"></span></div>
+  </div>`;
+  host.querySelector('.ttexit').onclick=()=>ttClose();
+  host.querySelector('.ttx').onclick=()=>ttClose();
+  host.querySelector('.ttslider').oninput=e=>setSimTime(Date.now()+(+e.target.value)*3600000, {reopen:true});
+  host.querySelectorAll('.ttn').forEach(b=>b.onclick=()=>setSimTime(now()+(+b.dataset.m)*60000));
+  host.querySelector('.ttdt').onchange=e=>{ const ts=new Date(e.target.value).getTime(); if(!isNaN(ts)) setSimTime(ts, {reopen:true}); };
+  host.querySelector('.ttjump').onchange=e=>{
+    if(!e.target.value) return;
+    const [ts,S,id]=e.target.value.split('|');
+    setSimTime(+ts-60000, {reopen:true, pick:{[S]:+id}});
+    e.target.value='';
+  };
+  host.querySelector('.ttreopen').onclick=()=>retime({reopen:true});
+  ttSync(); ttTick();
+}
+/* slider and date box follow the clock; skipped while the user is typing into the date box */
+function ttSync(){
+  const host=$('tt'); if(!SIM || !host.firstChild) return;
+  host.querySelector('.ttslider').value=String(Math.round(TIME_SHIFT/3600000));
+  const d=new Date(now()), dt=host.querySelector('.ttdt');
+  if(document.activeElement!==dt) dt.value=`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}`;
+}
+function ttTick(){
+  const host=$('tt'); if(!SIM || !host || !host.firstChild) return;
+  host.querySelector('.ttnow').textContent=new Date(now()).toLocaleString(dispLocale(),
+    {weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:hc(localHour12())});
+  const off=Math.round(TIME_SHIFT/1000)*1000;
+  host.querySelector('.ttoff').textContent = !off ? t('tt.real') : t(off>0?'tt.ahead':'tt.behind',{d:span(Math.abs(off))});
+}
+
+/* ---------- calendar: +cal and the .ics file share one set of entries ----------
+   Both used to build their own thin text: +cal a title plus a literal "\n" (the escape was
+   doubled, so Google showed the backslash), the .ics a title and "Reminder". calItems() is now
+   the single source, so a +cal link and the same row in the file always read identically. */
 function utc(ts){ const d=new Date(ts); return `${d.getUTCFullYear()}${p2(d.getUTCMonth()+1)}${p2(d.getUTCDate())}T${p2(d.getUTCHours())}${p2(d.getUTCMinutes())}${p2(d.getUTCSeconds())}Z`; }
-function gcalURL(col, text, ts){
-  const start=utc(ts-15*60000), end=utc(ts);
-  const det=`PJSK ${col.server} · ${col.event.name}\\n${text}\\nDeadline: ${fmtLocal(ts)} local`;
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('['+col.server+'] '+col.event.name+' — '+text)}&dates=${start}/${end}&details=${encodeURIComponent(det)}`;
-}
-function exportIcs(col){
-  const rows=deadlinesFor(col);
-  let v=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//pjsk-deadline-router//EN','CALSCALE:GREGORIAN'];
-  rows.forEach(r=>{
-    const at=r.at ?? r.end;
-    v.push('BEGIN:VEVENT',`UID:pjsk-${col.server}-${col.event.id}-${r.key}@local`,`DTSTAMP:${utc(now())}`,
-      `DTSTART:${utc(at-15*60000)}`,`DTEND:${utc(at)}`,
-      `SUMMARY:[${col.server}] ${col.event.name} — ${r.calLabel ?? r.label}`.replace(/,/g,'\\,'),
-      'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Reminder','TRIGGER:-P1D','END:VALARM',
-      'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Reminder','TRIGGER:-PT3H','END:VALARM','END:VEVENT');
+/* `all` skips the export filters (already passed, gachas that are done or permanent), which is
+   what a +cal lookup wants: the link exists on the row, so the entry must too. */
+function calItems(col, all){
+  const ev=col.event, S=col.server, out=[];
+  const why=(k,p)=>t('why.'+k,p);
+  // "PJSK" up front, so the entry says what it is among everything else in a calendar
+  const tag=`[PJSK ${S}]`;
+  const endWhy=()=>{
+    const open=EVENT_SUBTASKS.filter(rowOn).filter(k=>!doneState[`${S}|${ev.id}|${k}`]).map(k=>t('task.'+k));
+    return why('aggregate') + (open.length ? '\n'+why('open',{list:open.join(', ')}) : '');
+  };
+  // `optional` entries are offered but start unticked; see exportIcs
+  const add=(id,uid,at,kind,whyTxt,more)=>out.push(Object.assign({id, uid:`${ev.id}-${uid}`, group:'deadlines', at,
+    done:false, title:`${tag} ${t('cal.'+kind)} · ${ev.name}`, why:whyTxt, withEvent:true}, more));
+  deadlinesFor(col).forEach(r=>{
+    const kind = r.key==='aggregate' && r.at ? 'starts' : r.key;
+    const w = kind==='aggregate' ? endWhy()
+            : kind==='gacha' ? why('gacha',{name:r.note})
+            : kind==='vshow' ? (selectedVlive(col) ? why('vshow',{name:selectedVlive(col).name}) : why('approx'))
+            : kind==='exchange' ? why('exchange') + (r.note ? '\n'+why('approx') : '')
+            : why(kind);
+    // UIDs name the moment, not the rung, so "Event ends" is the same entry before and after kickoff
+    const uid = kind==='starts' ? 'start' : kind==='aggregate' ? 'end' : rowDoneKey(r);
+    add('r:'+rowDoneKey(r), uid, r.at ?? r.end, kind, w, {done:isDone(col,r), optional:kind==='starts' || !!r.skip});
   });
-  v.push('END:VCALENDAR');
-  const ics=v.join('\r\n');
-  const blob=new Blob([ics],{type:'text/calendar'}), a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download=`pjsk-${col.server}-${(col.event.name||'event').replace(/[^a-z0-9]+/gi,'-').toLowerCase()}.ics`; a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
-  showOut(t('e.icsOut',{server:col.server}), ics);
+  /* Moments with no rung of their own. Before kickoff the 🏁 rung is about the start, so the end
+     would otherwise be missing -- and the end is the one people want, so it is ticked. */
+  if(rowOn('aggregate') && now()<ev.startAt)
+    add('e:end', 'end', ev.aggregateAt, 'aggregate', endWhy(), {done:!!doneState[`${S}|${ev.id}|aggregate`]});
+  const g=col.eventGacha;
+  if(g && rowOn('gacha')) add('e:gstart', 'gacha-start', g.startAt, 'gachaStarts', why('gachaStarts',{name:g.name}), {optional:true});
+  const v=selectedVlive(col);
+  if(v && rowOn('vshow')) add('e:vfirst', `vshow-first-${v.id}`, v._s0, 'vshowFirst', why('vshowFirst',{name:v.name}), {optional:true});
+  const extra=(uid,at,title,whyTxt)=>out.push({id:'x:'+uid, uid, group:'extras', at, done:!!doneState[`${S}|${uid}`],
+    title:`${tag} ${title}`, why:whyTxt});
+  if(rowOn('pass') || rowOn('passdone')){ const pr=passResetAt(S); extra(`pass|${pr}`,pr,t('cal.pass'),why('pass')); }
+  const rs=currentSeason(col);
+  if(rs && rowOn('rank')) extra(`rank|${rs.id}`,rs.aggregatedAt,`${t('cal.rank')} · ${rs.name}`,why('rank',{name:rs.name}));
+  const wb=SERVERS[S].quirks.weeklyBadge;
+  if(wb && rowOn('badge')){ const wk=nextWeekly(SRV_TZ[S],wb.weekday,wb.hour); extra(`badge|${wk}`,wk,t('cal.badge'),why('badge')); }
+  const n=now();
+  if(rowOn('stamps')) (cache[S].pm||[]).filter(x=>x.startAt-SP_LEAD<=n && n<x.prog).forEach(x=>
+    extra(`PMC|${x.id}`, x.prog, t('cal.pm',{name:x.name}), why('pm',{name:x.name})));
+  if(rowOn('mexchange')) (cache[S].mx||[]).filter(x=>x.startAt-SP_LEAD<=n && n<x.endAt).forEach(x=>
+    extra(`MXC|${x.id}`, x.endAt, t('cal.mx',{name:x.name}), why('mx',{name:x.name})));
+  if(rowOn('clive')) (cache[S].vlives||[]).filter(v=>v.virtualLiveType==='streaming').forEach(v=>{ const w=cliveWindow(v);
+    if(w && w.from<=n && n<w.last) extra(`clive|${v.id}`, w.first, t('cal.clive',{name:v.name}), why('clive',{name:v.name})); });
+  if(rowOn('othergachas') && cache[S] && cache[S].gachas){
+    gachaRows(col).filter(r=>all || r.rank===0 || r.rank===2).forEach(r=>{
+      const nm=r.g.name||t('g.unnamed');
+      out.push({id:'g:'+r.g.id, uid:'G'+r.g.id, group:'gachas', at:r.g.endAt, done:r.done,
+        title:`${tag} ${t('cal.gachaEnds',{name:nm})}`, why:why('otherGacha',{name:nm})});
+    });
+  }
+  return all ? out : out.filter(it=>it.at>now());
 }
-function showOut(title, text){
-  $('out').className='out show'; $('outTitle').textContent=title; $('outArea').value=text;
-  $('outArea').focus(); $('outArea').select();
+function calDesc(col, it){
+  const ev=col.event, L=[it.why, t('cal.deadline',{local:fmtLocal(it.at), srv:fmtSrv(it.at,col.server)})];
+  if(it.withEvent) L.push(t('cal.event',{name:ev.name, server:col.server, type:etypeName(ev.eventType)}));
+  if(LINKS.app) L.push('', t('cal.madeWith',{url:LINKS.app}));
+  return L.join('\n');
+}
+function gcalURL(col, it){
+  const E=encodeURIComponent;
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${E(it.title)}&dates=${utc(it.at-PREFS.ics.len*60000)}/${utc(it.at)}&details=${E(calDesc(col,it))}`;
+}
+function openCal(col, id){ const it=calItems(col,true).find(x=>x.id===id); if(it) window.open(gcalURL(col,it),'_blank'); }
+
+/* RFC 5545 text escaping, then line folding at 75 octets (§3.1). The fold counts UTF-8 bytes, not
+   characters, because a JP event name is three bytes a character. */
+const icsEsc = v => String(v).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
+function icsFold(line){
+  let out='', cur='', bytes=0;
+  for(const ch of line){
+    const cp=ch.codePointAt(0), b = cp<0x80?1 : cp<0x800?2 : cp<0x10000?3 : 4;
+    if(bytes+b>75){ out+=cur+'\r\n '; cur=''; bytes=1; }
+    cur+=ch; bytes+=b;
+  }
+  return out+cur;
+}
+const icsDur = m => m%1440===0 ? `P${m/1440}D` : m%60===0 ? `PT${m/60}H` : `PT${m}M`;
+function buildIcs(col, items){
+  const len=PREFS.ics.len, stamp=utc(now());
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//PJSK Last Call//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  items.forEach(it=>{
+    L.push('BEGIN:VEVENT', `UID:pjsk-${col.server}-${it.uid}@pjsk-last-call`, `DTSTAMP:${stamp}`,
+      `DTSTART:${utc(it.at-len*60000)}`, `DTEND:${utc(it.at)}`,
+      `SUMMARY:${icsEsc(it.title)}`, `DESCRIPTION:${icsEsc(calDesc(col,it))}`,
+      'TRANSP:TRANSPARENT');                         // a deadline is not a meeting: never show as busy
+    if(LINKS.app) L.push(`URL:${LINKS.app}`);
+    /* Reminders are chosen relative to the DEADLINE, but a trigger is relative to the entry's
+       start, which sits `len` minutes earlier -- so shift by len. A reminder closer than the
+       entry length lands inside the entry, which RFC 5545 allows as a positive trigger. */
+    PREFS.ics.alarms.slice().sort((a,b)=>b-a).forEach(m=>{
+      const rel=m-len;
+      L.push('BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${icsEsc(it.title)}`,
+        `TRIGGER:${rel===0 ? 'PT0M' : rel>0 ? '-'+icsDur(rel) : icsDur(-rel)}`,'END:VALARM');
+    });
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.map(icsFold).join('\r\n')+'\r\n';
+}
+const durLbl = m => m%1440===0 ? t(m===1440?'dur.d':'dur.ds',{n:m/1440}) : m%60===0 ? t('dur.h',{n:m/60}) : t('dur.m',{n:m});
+/* The export used to be one click straight to a download: no say in what went in, what it was
+   called or when it reminded you, and no way to see the file first. It is now a dialog that lists
+   every entry, with the title editable in place and the file itself one fold away. */
+function exportIcs(col){
+  const items=calItems(col).map(it=>Object.assign({on: it.group==='deadlines' && !it.done && !it.optional}, it));
+  const extraAlarms=[];   // custom reminders added and then unticked this session stay visible
+  const fileName=`pjsk-${col.server}-${(col.event.name||'event').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||col.event.id}.ics`;
+  const rowHtml=(it,i)=>`<div class="icsrow${it.on?'':' off'}">
+      <input type="checkbox" class="icsck" id="icsck${i}" data-i="${i}"${it.on?' checked':''}>
+      <div class="icsmain"><input type="text" class="icst" data-i="${i}" value="${esc(it.title)}" aria-label="${t('ics.titleAria')}">
+        <label for="icsck${i}" class="icsw">${fmtLocal(it.at)}${it.done?' · '+t('ics.checked'):''}</label></div></div>`;
+  const group=g=>{ const xs=items.map((it,i)=>[it,i]).filter(([it])=>it.group===g).sort((a,b)=>a[0].at-b[0].at);
+    return xs.length ? `<div class="icsg">${t('ics.g.'+g)}</div>`+xs.map(([it,i])=>rowHtml(it,i)).join('') : ''; };
+  const wrap=document.createElement('div');
+  wrap.className='modal';
+  wrap.innerHTML=`<div class="modalbox icsbox">
+    <h3>${t('ics.title',{server:col.server})}</h3>
+    <p>${items.length ? t('ics.intro') : t('ics.none')}</p>
+    ${group('deadlines')}${group('extras')}${group('gachas')}
+    <div class="icsopt"><span>${t('ics.len')}</span><div class="seg icslen">${ICS_LENS.map(m=>
+      `<button type="button" data-v="${m}" aria-pressed="${PREFS.ics.len===m}">${durLbl(m)}</button>`).join('')}</div></div>
+    <div class="icsopt"><span>${t('ics.alarms')}</span><div class="icsalarms"></div>
+      <span class="icscustom"><span>${t('ics.custom')}</span>
+        <input type="number" class="icsnum" min="1" max="720" step="1" value="6" aria-label="${t('ics.customAria')}">
+        <select class="icsunit"><option value="60">${t('ics.hours')}</option><option value="1440">${t('ics.days')}</option></select>
+        <button type="button" class="btn xs icsadd">${t('ics.add')}</button>
+        <button type="button" class="btn xs icsreset">${t('ics.reset')}</button></span></div>
+    <p class="mhint" style="margin-top:12px">${t('ics.google')}</p>
+    <details class="dt"><summary>${t('ics.preview')}</summary><textarea class="icsraw" readonly></textarea></details>
+    <p class="mhint icsdone" hidden></p>
+    <div class="mbtns"><button class="btn sm mno">${t('ics.close')}</button><button class="btn sm myes icsdl"></button></div>
+  </div>`;
+  document.body.appendChild(wrap);
+  const $$=q=>[...wrap.querySelectorAll(q)];
+  const chosen=()=>items.filter(it=>it.on);
+  const update=()=>{
+    const n=chosen().length, dl=wrap.querySelector('.icsdl');
+    dl.textContent= n===1 ? t('ics.download1') : t('ics.download',{n}); dl.disabled=!n;
+    wrap.querySelector('.icsraw').value=buildIcs(col, chosen());
+  };
+  $$('.icsck').forEach(c=>c.onchange=()=>{ items[+c.dataset.i].on=c.checked; c.closest('.icsrow').classList.toggle('off',!c.checked); update(); });
+  $$('.icst').forEach(x=>x.oninput=()=>{ items[+x.dataset.i].title=x.value.trim()||items[+x.dataset.i].title; update(); });
+  $$('.icslen button').forEach(bt=>bt.onclick=()=>{
+    PREFS.ics.len=+bt.dataset.v; savePrefs();
+    $$('.icslen button').forEach(o=>o.setAttribute('aria-pressed', String(o===bt))); update(); });
+  const drawAlarms=()=>{
+    const all=[...new Set(ICS_ALARMS.concat(PREFS.ics.alarms, extraAlarms))].sort((a,b)=>a-b);
+    const box=wrap.querySelector('.icsalarms');
+    // the six built-in choices only switch on and off; one you added yourself also gets a × to delete it
+    box.innerHTML=all.map(m=>{
+      const chip=`<button type="button" class="ichip" data-v="${m}" aria-pressed="${PREFS.ics.alarms.includes(m)}">${durLbl(m)}</button>`;
+      return ICS_ALARMS.includes(m) ? chip
+        : `<span class="cchip">${chip}<button type="button" class="ichipx" data-del="${m}" aria-label="${t('ics.removeAria',{d:durLbl(m)})}">×</button></span>`;
+    }).join('');
+    box.querySelectorAll('.ichipx').forEach(x=>x.onclick=()=>{
+      const m=+x.dataset.del;
+      PREFS.ics.alarms=PREFS.ics.alarms.filter(v=>v!==m); savePrefs();
+      const i=extraAlarms.indexOf(m); if(i>=0) extraAlarms.splice(i,1);
+      drawAlarms(); update(); });
+    box.querySelectorAll('.ichip').forEach(bt=>bt.onclick=()=>{
+      const m=+bt.dataset.v, on=bt.getAttribute('aria-pressed')!=='true';
+      PREFS.ics.alarms = on ? PREFS.ics.alarms.concat(m) : PREFS.ics.alarms.filter(x=>x!==m); savePrefs();
+      bt.setAttribute('aria-pressed', String(on)); update(); });
+  };
+  wrap.querySelector('.icsadd').onclick=()=>{
+    const n=Math.round(+wrap.querySelector('.icsnum').value), m=n*(+wrap.querySelector('.icsunit').value);
+    if(!(n>0) || m>ICS_MAX_ALARM) return;
+    if(!PREFS.ics.alarms.includes(m)){ PREFS.ics.alarms=PREFS.ics.alarms.concat(m); savePrefs(); }
+    if(!ICS_ALARMS.includes(m) && !extraAlarms.includes(m)) extraAlarms.push(m);
+    drawAlarms(); update();
+  };
+  wrap.querySelector('.icsreset').onclick=()=>{
+    PREFS.ics.len=15; PREFS.ics.alarms=[180,1440]; savePrefs(); extraAlarms.length=0;
+    $$('.icslen button').forEach(o=>o.setAttribute('aria-pressed', String(+o.dataset.v===15)));
+    drawAlarms(); update();
+  };
+  drawAlarms();
+  wrap.querySelector('.icsdl').onclick=()=>{
+    const blob=new Blob([buildIcs(col, chosen())],{type:'text/calendar'}), a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=fileName; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    const d=wrap.querySelector('.icsdone'); d.textContent=t('ics.saved',{file:fileName}); d.hidden=false;
+  };
+  const close=()=>wrap.remove();
+  wrap.querySelector('.mno').onclick=close;
+  wrap.onclick=e=>{ if(e.target===wrap) close(); };
+  update();
 }
 
 /* ---------- help dialog ----------
@@ -1523,15 +2602,18 @@ function wireServerPick(root, getSel, onChange){
     };
   });
 }
-function renderFirstRun(){
+/* `again`: opened from Settings ("Run the first-time setup again"), so it starts from the current
+   choices and offers a way back. Choices made here apply as they are made, exactly as on a first run. */
+function renderFirstRun(again){
   $('firstrun').innerHTML = `<div class="firstrun">
     <h2>${t('fr.title')}</h2>
     <p>${t('fr.intro')}</p>${langPickHtml()}
-    <div class="srvpick">${serverPickHtml([])}</div>
+    <div class="srvpick">${serverPickHtml(again ? PREFS.servers||[] : [])}</div>
 
     <h2 style="font-size:.95rem;margin-top:18px">${t('set.presets')}<button type="button" class="presethelp" aria-label="${t('preset.helpTitle')}">${t('preset.help')}</button></h2>
-    ${presetButtonsHtml()}
-    <div class="panelnote" id="frPreset">${t('preset.note')}</div>
+    ${presetButtonsHtml('f2p')}
+    <div class="panelnote frrec">${t('fr.recNote')}</div>
+    <div class="panelnote" id="frPreset" hidden></div>
 
     <h2 style="font-size:.95rem;margin-top:18px">${t('fr.lookHead')}</h2>
     ${segHtml('theme', PREFS.theme, [['light',t('set.light')],['dark',t('set.dark')],['system',t('set.system')]])}
@@ -1546,18 +2628,19 @@ function renderFirstRun(){
       <span>${t('set.askOver')}</span>
       <input type="number" id="frMb" min="0" step="0.5" value="${(PREFS.warnBytes||2*MB)/MB}">
       <span>${t('set.mb')}</span>
-      <label class="tgl"><input type="checkbox" id="frNever"><span>${t('set.never')}</span></label>
+      <label class="tgl"><input type="checkbox" id="frNever" ${again && !PREFS.warnBytes?'checked':''}><span>${t('set.never')}</span></label>
     </div>
 
-    <div style="margin-top:18px"><button class="btn" id="frGo" disabled>${t('fr.start')}</button></div>
+    <div class="frgo"><button class="btn" id="frGo" disabled>${t('fr.start')}</button>${
+      again?`<button class="btn sm" id="frBack">${t('fr.back')}</button>`:''}</div>
     <div class="panelnote">${t('fr.note')}</div>
   </div>`;
-  let sel=[];
+  let sel = again ? (PREFS.servers||[]).slice() : [];
   const go=$('frGo'), mb=$('frMb'), never=$('frNever');
   const describe=()=>{
     if(!sel.length){ $('frSize').textContent=t('fr.sizePrompt'); return; }
     const core=sel.reduce((a,s)=>a+(estSize(s,'core')||0),0);
-    const vl=sel.reduce((a,s)=>a+(estSize(s,'vlives')||0),0);
+    const vl=sel.reduce((a,s)=>a+(estSize(s,'vlives')||0)+(estSize(s,'specials')||0),0);
     const gacha=sel.reduce((a,s)=>a+(estSize(s,'gachas')||0),0);
     $('frSize').innerHTML = t('fr.sizeDesc',{core:fmtBytes(core+vl), servers:sel.join(' + '), gacha:fmtBytes(gacha)});
   };
@@ -1573,15 +2656,18 @@ function renderFirstRun(){
     });
   };
   frSeg('theme',   v=>{ PREFS.theme=v; });
-  frSeg('density', v=>{ PREFS.density=v; });
+  frSeg('density', v=>{ PREFS.density=v; if(v==='comfortable') PREFS.art=true; });   // the hint above says what that means
   $('frSrv').onchange=e=>{ PREFS.showSrv=e.target.checked; showSrv=PREFS.showSrv; savePrefs(); };
   $('firstrun').querySelectorAll('.preset').forEach(b=>b.onclick=()=>{
     if(!applyPreset(b.dataset.preset)) return;
     $('frPreset').textContent = t('preset.applied',{name:t('preset.'+b.dataset.preset) || b.dataset.preset});
+    $('frPreset').hidden = false;
     $('firstrun').querySelectorAll('.preset').forEach(x=>x.classList.toggle('on', x===b));
   });
   const syncThresh=()=>{ mb.disabled=never.checked; };
   never.onchange=syncThresh; syncThresh();
+  go.disabled=!sel.length; describe();
+  if(again) $('frBack').onclick=()=>startApp();
   go.onclick=()=>{
     if(!sel.length) return;
     PREFS.servers=sel;
@@ -1602,57 +2688,126 @@ function wireSeg(name, onPick){
     onPick(b.dataset.v);
   });
 }
-function renderSettings(){
-  $('settings').innerHTML = `<div class="panel">
-    <h2>${t('set.servers')}</h2>
+/* Settings, V36: four collapsible sections instead of one long panel. Only Basics starts open, and
+   each section's open/closed state is remembered (PREFS.setOpen), so the panel opens the way it
+   was left. On a wide screen "What's shown", the long one, gets a column of its own beside the
+   other three; narrower, all four stack in reading order (see .setpanel in the CSS). Longer notes
+   moved behind "?" buttons, like the presets help. */
+const SEC_DEFAULT = {basics:true, shown:false, time:false, testing:false, rows:false};
+const secOpen = k => (PREFS.setOpen && k in PREFS.setOpen) ? !!PREFS.setOpen[k] : !!SEC_DEFAULT[k];
+function secHtml(k, sum, inner){
+  return `<details class="setsec" data-sec="${k}"${secOpen(k)?' open':''}><summary><span>${t('sec.'+k)}</span>${
+    sum?`<span class="secsum">${sum}</span>`:''}</summary><div class="secbody">${inner}</div></details>`;
+}
+const qhelp = k => `<button type="button" class="qhelp" data-help="${k}" aria-label="${t('set.help')}">?</button>`;
+const SET_HELP = {
+  servers: ()=>[t('set.servers'), `<p>${t('set.serversNote')}</p>`],
+  clock:   ()=>[t('set.clock'),   `<p>${t('set.clockNote')}</p>`],
+  rows:    ()=>[t('set.rows'),    `<p>${t('set.rowsNote')}</p><p>${t('preset.note')}</p>`],
+  data:    ()=>[t('set.data'),    `<p>${t('set.dataNote',{total:fmtBytes(coreEstTotal())})}</p>`],
+  tt:      ()=>[t('set.ttHelp'),  `<p>${t('tt.setNote')}</p>`],
+};
+/* the one-line summaries a closed section shows beside its title */
+const ALL_ROWS = ROW_TYPES.flatMap(([,ks])=>ks);
+const rowsSum = () => t('sum.rows',{n:ALL_ROWS.filter(rowOn).length, total:ALL_ROWS.length});
+const basicsSum = () => `${(PREFS.servers||[]).join(' · ')} · ${t('sum.'+PREFS.theme)} · ${t(isCompact()?'sum.compact':'sum.comfortable')}`;
+function updateSecSums(){
+  const root=$('settings'); if(!root) return;
+  const set=(sel,txt)=>{ const el=root.querySelector(sel); if(el && el.textContent!==txt) el.textContent=txt; };
+  set('[data-sec="basics"] > summary .secsum', basicsSum());
+  set('[data-sec="shown"] > summary .secsum', rowsSum());
+  set('[data-sec="rows"] > summary .secsum', rowsSum());
+  set('[data-sec="testing"] > summary .secsum', SIM?t('sum.ttOn'):'');
+}
+function renderSettings(msg){
+  const full=(PREFS.customPresets||[]).length>=MAX_CUSTOM;
+  const basics = `
+    <h2>${t('set.servers')}${qhelp('servers')}</h2>
     <div class="srvpick">${serverPickHtml(PREFS.servers)}</div>
-    <div class="panelnote">${t('set.serversNote')}</div>
     <h2>${t('set.theme')}</h2>
     ${segHtml('theme', PREFS.theme, [['light',t('set.light')],['dark',t('set.dark')],['system',t('set.system')]])}
     <h2>${t('set.density')}</h2>
     ${segHtml('density', PREFS.density, [['compact',t('set.compact')],['comfortable',t('set.comfortable')]])}
-    <h2>${t('set.display')}</h2>
-    <label class="tgl${isCompact()?' off':''}"><input type="checkbox" id="srvToggle2" ${PREFS.showSrv?'checked':''} ${isCompact()?'disabled':''}><span>${t('set.showSrv')}</span></label>
-    ${isCompact()?`<div class="panelnote" style="margin-top:4px">${t('set.showSrvOff')}</div>`:''}
-    <div style="margin-top:10px">${segHtml('gachafold', PREFS.gachaFold?'folded':'expanded',
-      [['expanded',t('set.gachaExpanded')],['folded',t('set.gachaFolded')]])}</div>
-    <div style="margin-top:10px">${segHtml('clock', PREFS.hour12,
-      [['auto',t('set.clockAuto')],['12',t('set.clock12')],['24',t('set.clock24')]])}</div>${langSettingHtml()}
+    <label class="tgl${isCompact()?' off':''}" style="margin-top:8px"><input type="checkbox" id="artToggle" ${PREFS.art===true?'checked':''} ${isCompact()?'disabled':''}><span>${t('set.art')}</span></label>
+    ${isCompact()?`<div class="panelnote" style="margin-top:4px">${t('set.artOff')}</div>`:''}`;
+  const shown = `
     <h2>${t('set.presets')}<button type="button" class="presethelp" aria-label="${t('preset.helpTitle')}">${t('preset.help')}</button></h2>
     ${presetButtonsHtml()}
     <div class="presetsave">
-      <input type="text" id="cpName" maxlength="24" placeholder="${t('preset.namePh')}"
-        ${(PREFS.customPresets||[]).length>=MAX_CUSTOM?'disabled':''}>
-      <button class="btn sm" id="cpSave" ${(PREFS.customPresets||[]).length>=MAX_CUSTOM?'disabled':''}>${t('preset.save')}</button>
+      <input type="text" id="cpName" maxlength="24" placeholder="${t('preset.namePh')}" ${full?'disabled':''}>
+      <button class="btn sm" id="cpSave" ${full?'disabled':''}>${t('preset.save')}</button>
     </div>
-    <div class="panelnote">${t('preset.note')}${(PREFS.customPresets||[]).length>=MAX_CUSTOM?' '+t('preset.full'):''}</div>
-    <h2>${t('set.rows')}</h2>
-    <div class="rowpick">${ROW_TYPES.map(([group,ks])=>
-      `<div class="rowgrp"><div class="rowgrph">${t('grp.'+group)}</div>${ks.map(k=>
-        `<label class="rowopt"><input type="checkbox" data-row="${k}" ${rowOn(k)?'checked':''}><span>${t('row.'+k)}</span>${
-          rowCost(k)?`<span class="rowcost">${rowCost(k)}</span>`:''}</label>`
-      ).join('')}</div>`).join('')}</div>
-    <div class="panelnote">${t('set.rowsNote')}</div>
-    <h2>${t('set.data')}</h2>
+    ${msg||full?`<div class="panelnote" id="presetMsg">${msg||''}${full?(msg?' ':'')+t('preset.full'):''}</div>`:''}
+    <div style="margin-top:12px">${segHtml('gachafold', PREFS.gachaFold?'folded':'expanded',
+      [['expanded',t('set.gachaExpanded')],['folded',t('set.gachaFolded')]])}</div>
+    <details class="setsub" data-sec="rows"${secOpen('rows')?' open':''}><summary><span>${t('sec.rows')}</span><span class="secsum">${
+      rowsSum()}</span>${qhelp('rows')}</summary>
+      <div class="rowpick">${ROW_TYPES.map(([group,ks])=>
+        `<div class="rowgrp"><div class="rowgrph">${t('grp.'+group)}</div>${ks.map(k=>
+          `<label class="rowopt"><input type="checkbox" data-row="${k}" ${rowOn(k)?'checked':''}><span>${t('row.'+k)}</span>${
+            rowCost(k)?`<span class="rowcost">${rowCost(k)}</span>`:''}</label>`
+        ).join('')}</div>`).join('')}</div>
+    </details>`;
+  const time = `
+    <h2>${t('set.clock')}${qhelp('clock')}</h2>
+    ${segHtml('clock', PREFS.hour12, [['auto',t('set.clockAuto')],['12',t('set.clock12')],['24',t('set.clock24')]])}
+    <label class="tgl" style="margin-top:10px"><input type="checkbox" id="sysDates" ${PREFS.dateFmt==='system'?'checked':''}><span>${t('set.sysDates')} <span class="hint">(${
+      new Date(now()).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})})</span></span></label>
+    <label class="tgl${isCompact()?' off':''}" style="margin-top:8px"><input type="checkbox" id="srvToggle2" ${PREFS.showSrv?'checked':''} ${isCompact()?'disabled':''}><span>${t('set.showSrv')}</span></label>
+    ${isCompact()?`<div class="panelnote" style="margin-top:4px">${t('set.showSrvOff')}</div>`:''}${langSettingHtml()}
+    <h2>${t('set.data')}${qhelp('data')}</h2>
     <div class="thresh">
       <span>${t('set.askOver')}</span>
       <input type="number" id="warnMb" min="0" step="0.5" value="${PREFS.warnBytes? (PREFS.warnBytes/MB) : 0}">
       <span>${t('set.mb')}</span>
       <label class="tgl"><input type="checkbox" id="warnNever" ${PREFS.warnBytes?'':'checked'}><span>${t('set.never')}</span></label>
+    </div>`;
+  const testing = `
+    <h2>${t('set.ttHelp')}${qhelp('tt')}</h2>
+    <label class="tgl"><input type="checkbox" id="ttToggle" ${SIM?'checked':''}><span>${t('tt.toggle')}</span></label>
+    <h2>${t('set.setup')}</h2>
+    <button type="button" class="btn sm" id="rerunSetup">${t('set.rerun')}</button>
+    <div class="panelnote" style="margin-top:6px">${t('set.rerunNote')}</div>`;
+  $('settings').innerHTML = `<div class="panel setpanel">
+    <div class="setcol">
+      ${secHtml('basics', basicsSum(), basics)}
+      ${secHtml('time', '', time)}
+      ${secHtml('testing', ' ', testing)}
     </div>
-    <div class="panelnote">${t('set.dataNote',{total:fmtBytes(coreEstTotal())})}</div>
+    <div class="setcol">
+      ${secHtml('shown', rowsSum(), shown)}
+    </div>
   </div>`;
-  wireServerPick($('settings'), ()=>PREFS.servers, s=>{
-    PREFS.servers=s; savePrefs(); buildColumns();
+  updateSecSums();
+  // remember each section's open/closed state, so the panel reopens the way it was left
+  $('settings').querySelectorAll('details[data-sec]').forEach(d=>d.addEventListener('toggle', ()=>{
+    if(secOpen(d.dataset.sec)===d.open) return;
+    PREFS.setOpen=Object.assign({}, PREFS.setOpen, {[d.dataset.sec]:d.open}); savePrefs();
+  }));
+  // a "?" inside a summary must open its help, not fold the section
+  $('settings').querySelectorAll('.qhelp').forEach(b=>b.onclick=e=>{
+    e.preventDefault(); e.stopPropagation();
+    const h=SET_HELP[b.dataset.help]; if(h) showHelp(...h());
   });
-  wireSeg('theme',   v=>{ PREFS.theme=v;   savePrefs(); applyTheme(); });
+  $('rerunSetup').onclick=()=>rerunSetup();
+  wireServerPick($('settings'), ()=>PREFS.servers, s=>{
+    PREFS.servers=s; savePrefs(); buildColumns(); updateSecSums();
+  });
+  wireSeg('theme',   v=>{ PREFS.theme=v;   savePrefs(); applyTheme(); updateSecSums(); });
   /* Density changes WHAT is rendered, not just how it is spaced -- chips vs rows, the server-time
      line, which timers appear, countdown precision. Repainting CSS alone left all of that stale
      until a reload, so this has to redraw and re-render the panel (whose showSrv control is
      disabled under compact). */
-  wireSeg('density', v=>{ PREFS.density=v; savePrefs(); applyTheme(); renderSettings(); redrawAll(); });
+  /* switching to Comfortable is the opt-in for artwork: say what it loads and from where first */
+  wireSeg('density', v=>{
+    const go=()=>{ PREFS.density=v; savePrefs(); applyTheme(); renderSettings(); redrawAll(); };
+    if(v==='comfortable' && PREFS.density!=='comfortable') artPrompt(ok=>{ if(ok===null){ renderSettings(); return; } PREFS.art=ok; go(); });
+    else go();
+  });
+  $('artToggle').onchange=e=>{ PREFS.art=e.target.checked; savePrefs(); redrawAll(); };
   wireSeg('gachafold', v=>{ PREFS.gachaFold = v==='folded'; savePrefs(); redrawAll(); });
   wireSeg('clock', v=>{ PREFS.hour12=v; savePrefs(); redrawAll(); });
+  $('sysDates').onchange = e=>{ PREFS.dateFmt = e.target.checked ? 'system' : 'en'; savePrefs(); redrawAll(); };
   wireLang($('settings'));
   wirePresetHelp($('settings'));
   $('srvToggle2').onchange = e=>{ showSrv=e.target.checked; PREFS.showSrv=showSrv; savePrefs(); redrawAll(); };
@@ -1660,7 +2815,7 @@ function renderSettings(){
     if(!applyPreset(b.dataset.preset)) return;
     // a preset can switch the virtual-show row back on, which may need data never downloaded
     if(rowOn('vshow')) await Promise.all(columns.map(c=>reloadVlives(c)));
-    renderSettings(); redrawAll();
+    renderSettings(t('preset.applied',{name:t('preset.'+b.dataset.preset) || b.dataset.preset})); redrawAll();
   });
   $('settings').querySelectorAll('.cpdel').forEach(b=>b.onclick=()=>{
     PREFS.customPresets = (PREFS.customPresets||[]).filter(x=>x.name!==b.dataset.del);
@@ -1678,8 +2833,10 @@ function renderSettings(){
     PREFS.rows[b.dataset.row]=b.checked; savePrefs();
     // unmuting the virtual-show row may need data we deliberately never downloaded
     if(b.dataset.row==='vshow' && b.checked) await Promise.all(columns.map(c=>reloadVlives(c)));
-    redrawAll();
+    if((b.dataset.row==='stamps' || b.dataset.row==='mexchange') && b.checked) await Promise.all(columns.map(c=>loadSpecials(c.server)));
+    updateSecSums(); redrawAll();
   });
+  $('ttToggle').onchange = e=>{ e.target.checked ? ttOpen() : ttClose(); updateSecSums(); };
   const mb=$('warnMb'), never=$('warnNever');
   const applyThresh=()=>{
     PREFS.warnBytes = never.checked ? 0 : Math.max(0, (+mb.value||0)*MB);
@@ -1689,6 +2846,18 @@ function renderSettings(){
   mb.onchange = applyThresh; never.onchange = applyThresh;
 }
 function redrawAll(){ columns.forEach(c=>{ if(c.event) renderColumn(c); }); }
+function artPrompt(cb){
+  const wrap=document.createElement('div');
+  wrap.className='modal';
+  wrap.innerHTML=`<div class="modalbox helpbox artbox"><h3>${t('art.title')}</h3>${t('art.body')}
+    <label class="tgl mwarn"><input type="checkbox" class="artload" ${PREFS.art===false?'':'checked'}><span>${t('art.load')}</span></label>
+    <div class="mbtns"><button class="btn sm mno">${t('art.cancel')}</button><button class="btn sm myes artgo">${t('art.go')}</button></div></div>`;
+  document.body.appendChild(wrap);
+  const done=v=>{ wrap.remove(); cb(v); };
+  wrap.querySelector('.mno').onclick=()=>done(null);
+  wrap.querySelector('.artgo').onclick=()=>done(wrap.querySelector('.artload').checked);
+  wrap.onclick=e=>{ if(e.target===wrap) done(null); };
+}
 /* the vlives file is skipped entirely while the row is muted, so unmuting has to go and get it */
 async function reloadVlives(col){
   if(!col.event) return;
@@ -1697,7 +2866,7 @@ async function reloadVlives(col){
   await prepEvent(col);
 }
 /* a rough "what does this row cost you" annotation, for the rows that drive a download */
-const ROW_RES = { vshow:'vlives', gacha:'gachas', othergachas:'gachas' };
+const ROW_RES = { vshow:'vlives', gacha:'gachas', othergachas:'gachas', stamps:'specials', mexchange:'specials', mpadv:'lmissions' };
 function rowCost(k){
   const res=ROW_RES[k]; if(!res) return '';
   const servers=(PREFS.servers||[]).filter(s=>SERVERS[s]);
@@ -1707,7 +2876,8 @@ function rowCost(k){
 function coreEstTotal(){
   const servers=(PREFS.servers||[]).filter(s=>SERVERS[s]);
   return servers.reduce((a,s)=>a+(knownSize(s,'core')||estSize(s,'core')||0)
-    + (rowOn('vshow')? (knownSize(s,'vlives')||estSize(s,'vlives')||0) : 0), 0);
+    + (rowOn('vshow')? (knownSize(s,'vlives')||estSize(s,'vlives')||0) : 0)
+    + (rowOn('stamps')||rowOn('mexchange')? (knownSize(s,'specials')||estSize(s,'specials')||0) : 0), 0);
 }
 
 /* ---------- boot ---------- */
@@ -1717,6 +2887,14 @@ function startApp(){
   showSrv=PREFS.showSrv;
   renderSettings();
   buildColumns();
+}
+/* Settings -> "Run the first-time setup again": the same page a new user sees, starting from the
+   current choices. Time travel is closed first, since the setup page has no bar to close it from. */
+function rerunSetup(){
+  if(SIM) ttClose();
+  $('settings').hidden=true;
+  $('app').hidden=true; $('firstrun').hidden=false;
+  renderFirstRun(true);
 }
 $('gear').onclick = ()=>{ const s=$('settings'); s.hidden=!s.hidden; };
 
