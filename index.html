@@ -500,8 +500,8 @@
     respective owners. This tool displays scheduling data fetched at runtime from the
     community-maintained <a href="https://github.com/Sekai-World" target="_blank" rel="noopener">Sekai-World</a>
     master-database mirrors; it does not redistribute game data or assets. Only if you switch on
-    artwork in Comfortable view does it show event and gacha banners, loaded directly from the
-    community-run <a href="https://sekai.best" target="_blank" rel="noopener">sekai.best</a> asset mirror.
+    artwork in Comfortable view, in the downloaded file, does it show event and gacha banners, loaded
+    directly from the community-run <a href="https://sekai.best" target="_blank" rel="noopener">sekai.best</a> asset mirror.
   </footer>
 
 <script>
@@ -684,8 +684,11 @@ const STRINGS = {
     'set.light':'Light', 'set.dark':'Dark', 'set.system':'Follow system',
     'set.density':'Density',
     'set.comfortable':'Comfortable · artwork', 'set.compact':'Compact · data saver',
+    'set.comfortableWeb':'Comfortable',
     'set.art':'Show event and gacha artwork (loaded from sekai.best)',
     'set.artOff':'Artwork only appears in Comfortable view.',
+    'set.artWeb':'Artwork can\'t load on the website: sekai.best, where the images come from, blocks them from being shown on other sites. It works in the downloaded file.',
+    'fr.densityHintWeb':'Compact is the default and fits noticeably more on screen; it is text only, so it also saves data. Comfortable is roomier and is the only one that can show server times. Event and gacha artwork only works in the downloaded file.',
     'art.title':'Comfortable view shows artwork',
     'art.body':`<p>Comfortable view adds the event banner and gacha banners, loaded straight from
       <b>sekai.best</b>, a community-run mirror of the game's assets. Each image is about 20–30 KB, a few per column.</p>
@@ -2008,7 +2011,16 @@ function refreshCacheLine(col){
    Straight from the community asset mirror, by the names in the master DB. A missing image removes
    itself rather than leaving a broken-image box: new events reach the mirror a little late. */
 const ART_BASE = 'https://storage.sekai.best/';
-const artOn = () => !isCompact() && PREFS.art===true;
+/* sekai.best serves its images only to its own site and to requests that name no site (Cloudflare
+   hotlink protection, found 2026-11-20 after 1.1.0 went live: a Referer of ymdsan.github.io,
+   github.com or localhost gets 403). A page opened from a downloaded file names no site, so artwork
+   works there. A page served over http(s) always does, so there artwork is switched off and says
+   why, rather than sending requests that can only be refused. Deliberately NOT worked around with
+   referrerpolicy="no-referrer": that would defeat a block the mirror's operators chose.
+   __PJSK_ART_HOST_OK lets the jsdom tests, which run at an https URL, exercise the artwork code. */
+const ART_HOST_OK = location.protocol === 'file:' || window.__PJSK_ART_HOST_OK === true;
+const artOn = () => ART_HOST_OK && !isCompact() && PREFS.art===true;
+const comfLabel = () => t(ART_HOST_OK ? 'set.comfortable' : 'set.comfortableWeb');
 const artImg = (S, path, cls) => `<img class="${cls}" src="${ART_BASE}${SERVERS[S].assets}/${path}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`;
 const gachaArt = (S, id, cls) => artImg(S, `home/banner/banner_gacha${id}/banner_gacha${id}.webp`, cls);
 
@@ -2618,8 +2630,8 @@ function renderFirstRun(again){
     <h2 style="font-size:.95rem;margin-top:18px">${t('fr.lookHead')}</h2>
     ${segHtml('theme', PREFS.theme, [['light',t('set.light')],['dark',t('set.dark')],['system',t('set.system')]])}
     <div style="margin-top:8px">${segHtml('density', PREFS.density,
-      [['compact',t('set.compact')],['comfortable',t('set.comfortable')]])}</div>
-    <div class="panelnote">${t('fr.densityHint')}</div>
+      [['compact',t('set.compact')],['comfortable',comfLabel()]])}</div>
+    <div class="panelnote">${t(ART_HOST_OK ? 'fr.densityHint' : 'fr.densityHintWeb')}</div>
     <label class="tgl" style="margin-top:8px"><input type="checkbox" id="frSrv" ${PREFS.showSrv?'checked':''}><span>${t('set.showSrv')}</span></label>
 
     <h2 style="font-size:.95rem;margin-top:18px">${t('fr.dataHead')}</h2>
@@ -2727,9 +2739,10 @@ function renderSettings(msg){
     <h2>${t('set.theme')}</h2>
     ${segHtml('theme', PREFS.theme, [['light',t('set.light')],['dark',t('set.dark')],['system',t('set.system')]])}
     <h2>${t('set.density')}</h2>
-    ${segHtml('density', PREFS.density, [['compact',t('set.compact')],['comfortable',t('set.comfortable')]])}
-    <label class="tgl${isCompact()?' off':''}" style="margin-top:8px"><input type="checkbox" id="artToggle" ${PREFS.art===true?'checked':''} ${isCompact()?'disabled':''}><span>${t('set.art')}</span></label>
-    ${isCompact()?`<div class="panelnote" style="margin-top:4px">${t('set.artOff')}</div>`:''}`;
+    ${segHtml('density', PREFS.density, [['compact',t('set.compact')],['comfortable',comfLabel()]])}
+    <label class="tgl${isCompact()||!ART_HOST_OK?' off':''}" style="margin-top:8px"><input type="checkbox" id="artToggle" ${ART_HOST_OK&&PREFS.art===true?'checked':''} ${isCompact()||!ART_HOST_OK?'disabled':''}><span>${t('set.art')}</span></label>
+    ${!ART_HOST_OK ? `<div class="panelnote" style="margin-top:4px">${t('set.artWeb')}</div>`
+      : isCompact() ? `<div class="panelnote" style="margin-top:4px">${t('set.artOff')}</div>` : ''}`;
   const shown = `
     <h2>${t('set.presets')}<button type="button" class="presethelp" aria-label="${t('preset.helpTitle')}">${t('preset.help')}</button></h2>
     ${presetButtonsHtml()}
@@ -2801,7 +2814,8 @@ function renderSettings(msg){
   /* switching to Comfortable is the opt-in for artwork: say what it loads and from where first */
   wireSeg('density', v=>{
     const go=()=>{ PREFS.density=v; savePrefs(); applyTheme(); renderSettings(); redrawAll(); };
-    if(v==='comfortable' && PREFS.density!=='comfortable') artPrompt(ok=>{ if(ok===null){ renderSettings(); return; } PREFS.art=ok; go(); });
+    // on the website there is no artwork to offer (see ART_HOST_OK), so no prompt either
+    if(v==='comfortable' && PREFS.density!=='comfortable' && ART_HOST_OK) artPrompt(ok=>{ if(ok===null){ renderSettings(); return; } PREFS.art=ok; go(); });
     else go();
   });
   $('artToggle').onchange=e=>{ PREFS.art=e.target.checked; savePrefs(); redrawAll(); };

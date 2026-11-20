@@ -26,9 +26,15 @@ attention until the next event.
 **Online — <https://ymdsan.github.io/pjsk-last-call/>** — nothing to install.
 **Recommended for mobile users.**
 
+> **No artwork on the website.** The event and gacha banners come from
+> [sekai.best](https://sekai.best), which blocks its images from being shown on other websites, so
+> they cannot load at ymdsan.github.io and the artwork switch is greyed out there. Everything else
+> works the same. If you want the banners, use the downloaded file below.
+
 **Offline — download `index.html` and open it.** One self-contained file: no dependencies, no build
 step, no server. It runs straight from a `file://` path, which makes it easy to keep in a folder,
-edit, or carry on a USB stick. Best suited to desktop, and **not recommended on mobile** — opening
+edit, or carry on a USB stick. It is also the only way to see the artwork. Best suited to desktop,
+and **not recommended on mobile** — opening
 a downloaded `.html` file on a phone is awkward, with no clean way to launch it, and most mobile
 browsers lose the file once you close the tab or restart the browser, so you end up digging through
 your downloads every time.
@@ -107,9 +113,10 @@ compact hides it to save width, and says so when you look for the setting.
 **Dates.** Shown in English by default. Settings can switch them to your system's own format, and
 the Clock setting picks 12- or 24-hour.
 
-**Artwork.** Comfortable view can show each event's banner and the gacha banners, loaded from the
-community-run [sekai.best](https://sekai.best) asset mirror. You are asked when you switch to it.
-Compact stays text-only, so it doubles as a data saver.
+**Artwork (downloaded file only).** Comfortable view can show each event's banner and the gacha
+banners, loaded from the community-run [sekai.best](https://sekai.best) asset mirror. You are asked
+when you switch to it. Compact stays text-only, so it doubles as a data saver. On the website the
+switch is greyed out, because sekai.best blocks its images from being shown on other websites.
 
 **Time travel.** Under *Testing & setup* in Settings. It shows the page as it would look at another
 date and time, which is handy for checking what a deadline will look like before it arrives.
