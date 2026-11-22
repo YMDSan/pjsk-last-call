@@ -74,8 +74,15 @@
   /* the whole row is the target, not just the box */
   .rlab{display:flex;align-items:center;gap:6px;min-width:0;cursor:pointer;flex:1}
   /* checkbox AND name are the tap target, matching the deadline rungs */
-  /* a small basis so the name yields space to the countdown pair rather than pushing it away */
-  .gchklab{display:flex;align-items:center;gap:7px;flex:1 1 60px;min-width:0;cursor:pointer;user-select:none}
+  /* V39: the basis is the checkbox (+ thumbnail) plus the width the name needs to fit in three
+     lines (--gw, worked out from its characters when the row is built, never less than 10em).
+     When the row can't give it that beside the countdown, flex-wrap moves the countdown and +cal
+     to their own line. Pure CSS: nothing is measured, so nothing re-adjusts after a render or
+     while the window is being resized. */
+  .gchklab{display:flex;align-items:center;gap:7px;flex:1 1 calc(var(--gfix,21px) + var(--gw,10em));min-width:0;cursor:pointer;user-select:none}
+  .grow{--gfix:21px}
+  .grow.art{--gfix:89px}
+  @media (pointer: coarse){ .grow{--gfix:29px} .grow.art{--gfix:97px} }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--text);
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
@@ -400,9 +407,9 @@
   .grow .gn{color:var(--text);line-height:1.32;word-break:break-word;min-width:0}
   /* countdown and +cal travel together and never split across lines; only the name wraps */
   .gmeta{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto;white-space:nowrap}
-  /* V35: once the name would take more than three lines beside the countdown, the countdown and
-     +cal move to their own line instead (fitGachaRows decides, per row, from the real layout) */
-  .grow.stack .gchklab{flex-basis:100%}
+  /* V35 measured each row after rendering and stacked it if the name passed three lines. V39
+     replaced that with the .gchklab basis above, because the measure-then-fix pass made rows jump
+     (a one-letter-wide name for a moment) on every re-render, resize and time-travel drag. */
   .grow .cd{flex:none}
   .grow.done .gn{color:var(--far);text-decoration:line-through;text-decoration-color:var(--line)}
   .grow .cal{flex:none;font-size:.62rem;color:var(--faint);cursor:pointer;text-transform:uppercase}
@@ -460,12 +467,18 @@
   /* stamp pages: as many chips per row as fit (at least ~84px each), wrapping to more rows */
   .tchips.pmchips{grid-auto-flow:row;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));margin:4px 0 2px}
   details.dt.sub .pmchips{margin-left:0}
-  .pmh .cd{margin-left:auto}
+  /* a fixed slot as wide as the longest countdown ("ends in 09:59:41"), so a long mission name wraps
+     the same way whether it shows a countdown or "✓ done" and nothing below moves (V39) */
+  .pmh .pmcd{flex:none;margin-left:auto;min-width:11.5em;text-align:right}
+  /* every page ticked: muted like a finished deadline row (V39) */
+  .pmc.done .pmn{color:var(--far);text-decoration:line-through;text-decoration-color:var(--line)}
   .citem .inote{display:block;font-size:.7rem;color:var(--faint);font-weight:400}
   /* artwork: Comfortable only, opt-in, loaded straight from the sekai.best mirror */
-  .evart{display:block;width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin:0 0 9px}
-  .gart{display:block;width:100%;max-width:260px;border-radius:8px;margin:5px 0 2px}
-  /* a fixed box (the banners are 488x208), so the row does not reflow when the image arrives */
+  /* the banners are 488x208: their space is held from the start (V39), so nothing below them
+     moves down when one arrives */
+  .evart{display:block;width:100%;aspect-ratio:488/208;max-height:150px;object-fit:cover;border-radius:10px;margin:0 0 9px}
+  .gart{display:block;width:100%;max-width:260px;aspect-ratio:488/208;object-fit:cover;border-radius:8px;margin:5px 0 2px}
+  /* a fixed box, so the row does not reflow when the image arrives */
   .gthumb{flex:none;height:26px;width:61px;object-fit:cover;border-radius:5px}
   /* the enlarged banner shown after hovering a thumbnail for a moment (mouse only) */
   .gpop{position:fixed;z-index:60;pointer-events:none;padding:4px;background:var(--stage);
@@ -1639,8 +1652,15 @@ function gachaRows(col){
       : (a.rank===0||a.rank===1) ? a.g.endAt-b.g.endAt       // ends/permanent: soonest end
       : b.g.endAt-a.g.endAt);                                // ended/done: most recent first
 }
-function gachaRowHtml(col,r){ const g=r.g;
-  return `<div class="grow${r.done?' done':''}" data-gkey="${r.gk}" data-end="${g.endAt}"><label class="gchklab"><input type="checkbox" class="gchk" ${r.done?'checked':''}>${artOn()?gachaArt(col.server,g.id,'gthumb'):''}<span class="gn mono">${g.name||t('g.unnamed')}</span></label><span class="gmeta"><span class="cd mono"${r.gam?' data-grey':''} data-start="${g.startAt}" data-end="${g.endAt}">${r.done?'✓ done':''}</span>${rowOn('cal')?`<span class="cal" data-ci="g:${g.id}">${t('rung.cal')}</span>`:''}</span></div>`;
+/* V39: the width a gacha name asks for beside its countdown, in em, from its characters alone (the
+   name is monospace: Latin about 0.55em a character; CJK and symbols such as ★ a full 1em). A short
+   name asks for its own one-line width; a long one for enough to fit in three lines (15% spare for
+   word breaks), never under 10em. It sets the row's CSS basis, so whether the countdown moves to
+   its own line is decided before the row is drawn, never after. */
+function nameEm(s){ let u=0; for(const ch of String(s)) u += ch.codePointAt(0) >= 0x2190 ? 1 : 0.55;
+  return Math.ceil(Math.min(u*1.05, Math.max(10, u/3*1.15))); }
+function gachaRowHtml(col,r){ const g=r.g, th=artOn() ? gachaArt(col.server,g.id,'gthumb') : '';   // '' for a known-missing banner too
+  return `<div class="grow${r.done?' done':''}${th?' art':''}" style="--gw:${nameEm(g.name||t('g.unnamed'))}em" data-gkey="${r.gk}" data-end="${g.endAt}"><label class="gchklab"><input type="checkbox" class="gchk" ${r.done?'checked':''}>${th}<span class="gn mono">${g.name||t('g.unnamed')}</span></label><span class="gmeta"><span class="cd mono"${r.gam?' data-grey':''} data-start="${g.startAt}" data-end="${g.endAt}">${r.done?'✓ done':''}</span>${rowOn('cal')?`<span class="cal" data-ci="g:${g.id}">${t('rung.cal')}</span>`:''}</span></div>`;
 }
 /* "I don't have 90,000 crystals saved": per server, since each server is its own account */
 const noCeil = S => !!(PREFS.noCeil||{})[S];
@@ -1710,32 +1730,14 @@ function wireGacha(col){
   // opening the list asks first, every time; closing it never does
   const gd=gs.querySelector('details.gamble');
   if(gd) gd.querySelector('summary').onclick=e=>{ if(gd.open) return; e.preventDefault(); gambleWarn(()=>{ gd.open=true; }); };
-  // a fold that opens shows rows that had no layout until now
-  gs.querySelectorAll('details').forEach(d=>d.addEventListener('toggle', ()=>{ if(d.open) fitGachaRows(d); }));
+  // row layout is pure CSS since V39 (see nameEm): nothing to measure here, now or on resize
   wireThumbPop(gs);
-  fitGachaRows(gs);
-  // a thumbnail that fails removes itself and gives its row more room: measure again afterwards
-  let refit=null; const later=()=>{ clearTimeout(refit); refit=setTimeout(()=>fitGachaRows(gs), 60); };
-  gs.addEventListener('error', later, true); gs.addEventListener('load', later, true);
   tickColumn(col);
-}
-/* Per row: is the gacha name taller than three lines beside its countdown? Then stack. Each row
-   is first measured unstacked, so widening the window can undo it. Rows inside a closed fold have
-   no layout and are measured when the fold opens. */
-function fitGachaRows(root){
-  root.querySelectorAll('.grow').forEach(row=>{
-    const gn=row.querySelector('.gn'); if(!gn || !gn.getClientRects().length) return;
-    row.classList.remove('stack');
-    // line-height may come back in px or as the bare 1.32 multiplier, depending on the engine
-    const cs=getComputedStyle(gn), fs=parseFloat(cs.fontSize)||13, raw=cs.lineHeight||'';
-    const lh = /px$/.test(raw) ? parseFloat(raw) : (parseFloat(raw)>0 ? parseFloat(raw)*fs : fs*1.32);
-    if(gn.getBoundingClientRect().height > lh*3.5) row.classList.add('stack');
-  });
 }
 /* mouse only: touch has no hover, and there the thumbnail stays part of the row's tap target */
 const canHover = () => !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
 let popTimer=null;
-const POP_DELAY=700;   // long enough not to flash while the mouse crosses the list
+const POP_DELAY=500;   // long enough not to flash while the mouse crosses the list (700 until V40)
 function wireThumbPop(root){
   if(!canHover()) return;
   root.querySelectorAll('img.gthumb').forEach(img=>{
@@ -1756,8 +1758,6 @@ function showPop(img){
 }
 function hidePop(){ clearTimeout(popTimer); const pop=$('gpop'); if(pop) pop.hidden=true; }
 window.addEventListener('scroll', hidePop, {passive:true});
-let fitTimer=null;
-window.addEventListener('resize', ()=>{ clearTimeout(fitTimer); fitTimer=setTimeout(()=>columns.forEach(c=>{ if(c.root) fitGachaRows(body(c)); }), 150); });
 function renderGachaSection(col){
   const gs=body(col).querySelector('.gsect'); if(!gs) return;
   const folds=foldState(gs);
@@ -1970,7 +1970,7 @@ function renderColumn(col){
     if(on) doneState[key]=+el.dataset.end; else delete doneState[key];
     saveDone();
     el.classList.toggle('done', on); el.setAttribute('aria-pressed', String(on));
-    if(el.closest('.pmc')){ renderColumn(col); return; }   // a stamp page: the "n of m pages" count
+    const pmc=el.closest('.pmc'); if(pmc){ syncPmc(pmc); return; }   // a stamp page: its own block only
     syncAllDone(col);
   });
   b.querySelectorAll('.ichk').forEach(chk=>chk.onchange=e=>{
@@ -1980,7 +1980,7 @@ function renderColumn(col){
     item.classList.toggle('done', e.target.checked);
     const cd=item.querySelector('.cd');
     if(cd){ if(e.target.checked){ cd.textContent='✓ done'; cd.className='cd mono c-done'; } else { tickEl(cd); } }
-    if(item.closest('.pmc')){ renderColumn(col); return; }   // the "n of m pages" count
+    const pmc=item.closest('.pmc'); if(pmc){ syncPmc(pmc); return; }   // its own block only
     if(item.classList.contains('sub')) syncAllDone(col);
   });
   const eics=b.querySelector('.eics'); if(eics) eics.onclick=()=>exportIcs(col);
@@ -2008,8 +2008,8 @@ function refreshCacheLine(col){
 }
 
 /* ---------- artwork (Comfortable view, opt-in) ----------
-   Straight from the community asset mirror, by the names in the master DB. A missing image removes
-   itself rather than leaving a broken-image box: new events reach the mirror a little late. */
+   Straight from the community asset mirror, by the names in the master DB. A missing image never
+   shows a broken-image box (new events reach the mirror a little late): see artMiss below. */
 const ART_BASE = 'https://storage.sekai.best/';
 /* sekai.best serves its images only to its own site and to requests that name no site (Cloudflare
    hotlink protection, found 2026-11-20 after 1.1.0 went live: a Referer of ymdsan.github.io,
@@ -2021,7 +2021,19 @@ const ART_BASE = 'https://storage.sekai.best/';
 const ART_HOST_OK = location.protocol === 'file:' || window.__PJSK_ART_HOST_OK === true;
 const artOn = () => ART_HOST_OK && !isCompact() && PREFS.art===true;
 const comfLabel = () => t(ART_HOST_OK ? 'set.comfortable' : 'set.comfortableWeb');
-const artImg = (S, path, cls) => `<img class="${cls}" src="${ART_BASE}${SERVERS[S].assets}/${path}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`;
+/* V39: a banner that fails is remembered for the session (ART_MISS), so a re-render (a tick, a
+   time-travel drag) never asks the mirror again and never draws the slot just to drop it. The image
+   is removed, slot and all (V41: the author prefers unaligned names to an empty gap, and many
+   banners have no thumbnail anyway); a gacha row also drops its thumbnail basis. Only the first
+   failure in a session moves anything. Not kept across reloads: new events reach the mirror a
+   little late, and a reload should see them. */
+const ART_MISS = new Set();
+function artMiss(img){
+  ART_MISS.add(img.getAttribute('src'));
+  const row=img.closest('.grow'); img.remove(); if(row && !row.querySelector('img.gthumb')) row.classList.remove('art');
+}
+const artImg = (S, path, cls) => { const src=`${ART_BASE}${SERVERS[S].assets}/${path}`;
+  return ART_MISS.has(src) ? '' : `<img class="${cls}" src="${src}" alt="" loading="lazy" decoding="async" onerror="artMiss(this)">`; };
 const gachaArt = (S, id, cls) => artImg(S, `home/banner/banner_gacha${id}/banner_gacha${id}.webp`, cls);
 
 const fmtDay = ts => new Date(ts).toLocaleDateString(dispLocale(),{month:'short',day:'numeric'});
@@ -2042,10 +2054,12 @@ function spHtml(col){
     const pages=`<div class="tchips pmchips">${pm.pages.map((p,i)=>{ const dn=!!doneState[keys[i]];
       return `<button type="button" class="tchip${dn?' done':''}" data-key="${keys[i]}" data-end="${pm.closedAt}" aria-pressed="${dn}">${esc(p.name)}</button>`;
     }).join('')}</div>`;
-    const notes=[pm.pages.length===1 ? t('sp.ticked1',{d}) : t('sp.ticked',{d, n:pm.pages.length})];
+    // every page ticked mutes the block like a finished deadline row: "✓ done", no countdown (V39)
+    const all = keys.length>0 && d===keys.length;
+    const notes=[`<span class="pmcount">${pmCount(d, pm.pages.length)}</span>`];
     if(ended) notes.push(t('sp.claimNow'));
     else if(pm.closedAt-pm.prog > 3600000) notes.push(t('sp.claim',{closed:fmtLocal(pm.closedAt)}));
-    h+=`<div class="pmc" data-pm="${pm.id}"><div class="pmh"><span class="pmn">${esc(pm.name)}</span><span class="cd mono" data-start="${pm.startAt}" data-end="${target}"></span></div>
+    h+=`<div class="pmc${all?' done':''}" data-pm="${pm.id}"><div class="pmh"><span class="pmn">${esc(pm.name)}</span><span class="pmcd"><span class="cd mono${all?' c-done':''}" data-start="${pm.startAt}" data-end="${target}">${all?'✓ done':''}</span></span></div>
       <div class="rnote">${notes.join(' · ')}</div>${pm.pages.length>8
         ? `<details class="dt sub" data-dt="pm${pm.id}"><summary>${t('sp.pages',{n:pm.pages.length})}</summary>${pages}</details>`
         : pages}</div>`;
@@ -2062,6 +2076,18 @@ function spHtml(col){
     });
   }
   return h ? `<div class="sect spsect"><div class="vh">${t('sp.title')}</div>${h}</div>` : '';
+}
+function pmCount(d, n){ return n===1 ? t('sp.ticked1',{d}) : t('sp.ticked',{d, n}); }
+/* A stamp page tick updates only its own block: the "n of m" count, and the header's "✓ done" once
+   every page is ticked. Before V39 it re-rendered the whole column, which redrew (and re-measured)
+   everything below it, including the gacha list. */
+function syncPmc(pmc){
+  const chips=[...pmc.querySelectorAll('.tchip[data-key]')];
+  const d=chips.filter(c=>doneState[c.dataset.key]).length, n=chips.length, all=n>0 && d===n;
+  const cnt=pmc.querySelector('.pmcount'); if(cnt) cnt.textContent=pmCount(d, n);
+  pmc.classList.toggle('done', all);
+  const cd=pmc.querySelector('.pmh .cd');
+  if(cd){ if(all){ cd.textContent='✓ done'; cd.className='cd mono c-done'; } else tickEl(cd); }
 }
 
 /* ---------- mission-pass progress advisor ----------
@@ -2200,7 +2226,7 @@ function tickColumn(col){
   const sc=root.querySelector('.srvclock'); if(sc) sc.textContent=srvClock(col.server);
   refreshCacheLine(col);
   mpUpdate(col);
-  root.querySelectorAll('.cd[data-end]').forEach(el=>{ if(el.classList.contains('nextcd')) return; const host=el.closest('.rung,.grow,.citem'); if(host&&host.classList.contains('done')&&!el.hasAttribute('data-grey')) return; tickEl(el); });
+  root.querySelectorAll('.cd[data-end]').forEach(el=>{ if(el.classList.contains('nextcd')) return; const host=el.closest('.rung,.grow,.citem,.pmc'); if(host&&host.classList.contains('done')&&!el.hasAttribute('data-grey')) return; tickEl(el); });
   const v=selectedVlive(col), ncd=root.querySelector('.nextcd'), nsk=root.querySelector('.nsk');
   if(v&&ncd){
     const ns=nextShow(v._sch);

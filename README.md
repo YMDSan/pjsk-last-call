@@ -139,7 +139,8 @@ nothing is left. Before an event it counts server days ("starts next server day"
 day rolls over at 04:00 server time, not at your midnight.
 
 **Stamp missions and shops.** Collaboration and anniversary stamp missions get their own block,
-with a countdown and a button per page to tick it off, along with limited-time exchange shops and
+with a countdown and a button per page to tick it off; once every page is ticked, the countdown turns
+into "✓ done" like any other finished row. Limited-time exchange shops are listed there too, with
 their closing dates.
 
 **Mission pass.** Under Extras, drag the slider to your live mission points and the tool says
