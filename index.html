@@ -470,6 +470,11 @@
   /* a fixed slot as wide as the longest countdown ("ends in 09:59:41"), so a long mission name wraps
      the same way whether it shows a countdown or "✓ done" and nothing below moves (V39) */
   .pmh .pmcd{flex:none;margin-left:auto;min-width:11.5em;text-align:right}
+  /* V44: what a task is worth. inline-block, so a done row's line-through doesn't run through it;
+     muted, not removed, once the row is done, so nothing shifts */
+  .cbadge{display:inline-block;margin-left:4px;padding:0 6px;border-radius:6px;font-size:.68rem;font-weight:700;line-height:1.5;
+    color:var(--cyan);background:color-mix(in srgb, var(--cyan) 14%, transparent);white-space:nowrap;vertical-align:1px;text-decoration:none}
+  .done .cbadge{opacity:.45;filter:grayscale(1)}
   /* every page ticked: muted like a finished deadline row (V39) */
   .pmc.done .pmn{color:var(--far);text-decoration:line-through;text-decoration-color:var(--line)}
   .citem .inote{display:block;font-size:.7rem;color:var(--faint);font-weight:400}
@@ -524,17 +529,22 @@
 const SERVERS = {
   EN:{ id:'EN', label:'EN', name:'Global (English)',  repo:'sekai-master-db-en-diff',
        tz:'America/Los_Angeles', tzLabel:'PT',  hour12:true,  accent:'#4a9eff', accentLight:'#1f6fd0',
-       est:{core:279756, vlives:433423, gachas:2927977, specials:127443, lmissions:176156},
-       assets:'sekai-en-assets', quirks:{} },
+       est:{core:372000, vlives:433423, gachas:2927977, specials:127443, lmissions:176156, rewards:1220000},
+       /* weeklyMissions: EN-only weekly missions (weeklyMissionGls.json + weeklyMissionPeriodGls.json,
+          a few KB, added to EN in 2026-09); they reset every week at the weekday and hour their
+          period started, server time (V43) */
+       assets:'sekai-en-assets', quirks:{ weeklyMissions:true } },
   JP:{ id:'JP', label:'JP', name:'Japan',             repo:'sekai-master-db-diff',
        tz:'Asia/Tokyo',          tzLabel:'JST', hour12:false, accent:'#ff5c8a', accentLight:'#d12a63',
-       est:{core:346275, vlives:666753, gachas:3539027, specials:153072, lmissions:236683},
+       est:{core:370000, vlives:666753, gachas:3539027, specials:153072, lmissions:236683, rewards:1420000},
        assets:'sekai-jp-assets', quirks:{} },
   CN:{ id:'CN', label:'CN', name:'Mainland China',    repo:'sekai-master-db-cn-diff',
        tz:'Asia/Shanghai',       tzLabel:'CST', hour12:false, accent:'#ffce3f', accentLight:'#9a6c05',
-       est:{core:183344, vlives:194794, gachas:329574, specials:98481, lmissions:53313},
+       est:{core:192000, vlives:194794, gachas:329574, specials:98481, lmissions:53313, rewards:405000},
        assets:'sekai-cn-assets',
-       quirks:{ weeklyBadge:{ label:'闪耀徽章 weekly exchange', weekday:'Mon', hour:4 } } },
+       /* compactBoxes: CN publishes reward contents as columns (compactResourceBoxDetails.json, enum
+          columns indexing __ENUM__), about a third of the size of EN/JP's resourceBoxes.json (V44) */
+       quirks:{ weeklyBadge:{ label:'闪耀徽章 weekly exchange', weekday:'Mon', hour:4 }, compactBoxes:true } },
 };
 const SERVER_IDS = Object.keys(SERVERS);
 const RAW = s => `https://raw.githubusercontent.com/Sekai-World/${SERVERS[s].repo}/main`;
@@ -593,15 +603,22 @@ const STORE = {
    mission-pass month. A cache from before that is refetched once -- events and virtual lives are a
    few hundred KB together. Gacha timing (several MB) is kept as it is; the one feature that needs
    its new field says so and points at the gacha refresh button. */
-const CACHE_FMT = 2;
+/* V43 (format 3) adds each event's bonus missions and EN's weekly missions to the core data; an
+   older cache refetches the core once (a few hundred KB) to get them. V44 (format 4) adds the reward
+   box ids the crystal badges look up: story episodes (epBox), exchange items (exr), virtual-show
+   rewards, stamp-mission pages and ranked tiers. The crystal amounts themselves (cr) are their own
+   opt-in download and survive a format change. */
+const CACHE_FMT = 4;
 function persist(s){ const c=cache[s]; if(!c) return;
   STORE.set(s,{fmt:CACHE_FMT,events:c.events,exchange:c.exchange,eventCards:c.eventCards,episodes:c.episodes,seasons:c.seasons,
-    lmp:c.lmp||[],lmMax:c.lmMax||{},pm:c.pm||null,mx:c.mx||null,
+    lmp:c.lmp||[],lmMax:c.lmMax||{},pm:c.pm||null,mx:c.mx||null,missions:c.missions||{},weekly:c.weekly||null,
+    epBox:c.epBox||{},exr:c.exr||{},cr:c.cr||null,selg:c.selg||{},lmBox:c.lmBox||{},
     vlives:c.vlives,gachas:c.gachas,fetchedAt:c.fetchedAt||{},sizes:c.sizes||{}}); }
 function hydrate(s){ const d=STORE.get(s);
   if(!d || !(d.events || d.gachas)) return false;
   cache[s]={events:d.events||null,exchange:d.exchange||{},eventCards:d.eventCards||{},episodes:d.episodes||{},seasons:d.seasons||[],
-    lmp:d.lmp||[],lmMax:d.lmMax||{},pm:d.pm||null,mx:d.mx||null,
+    lmp:d.lmp||[],lmMax:d.lmMax||{},pm:d.pm||null,mx:d.mx||null,missions:d.missions||{},weekly:d.weekly||null,
+    epBox:d.epBox||{},exr:d.exr||{},cr:d.cr||null,selg:d.selg||{},lmBox:d.lmBox||{},
     vlives:d.vlives||null,gachas:d.gachas||null,fetchedAt:d.fetchedAt||{},sizes:d.sizes||{}};
   if(d.fmt!==CACHE_FMT){ cache[s].events=null; cache[s].vlives=null; cache[s].pm=null; cache[s].mx=null; }
   return true; }
@@ -616,10 +633,11 @@ const PREFS_KEY='pjsk_prefs_v1';
    rather than hidden — spending-side context, not acquisition. */
 const ROW_TYPES = [
   ['Deadlines',   ['aggregate','gacha','exchange','vshow']],
-  ['Event tasks', ['episodes','combo10','finalreward']],
+  ['Event tasks', ['bonus']],   // V43: one row for the whole bonus-mission list (was episodes, combo10, finalreward)
   ['Campaigns',   ['stamps','mexchange']],
-  ['Extras',      ['pass','passdone','mpadv','cplus','rank','badge','clive']],
+  ['Extras',      ['pass','passdone','mpadv','cplus','rank','badge','weekly','clive']],
   ['Gachas',      ['othergachas','paidgachas']],
+  ['Crystals',    ['crystals']],   // V44: the badges; nothing is downloaded until the column's button is used
   ['Export',      ['cal','ics']],
 ];
 const DEFAULT_ROWS = Object.fromEntries(ROW_TYPES.flatMap(([,ks])=>ks.map(k=>[k,true])));
@@ -716,10 +734,11 @@ const STRINGS = {
     'preset.helpBody':`<p><b>By default every row is shown</b>, grouped like this:</p>
       <ul class="mfacts">
         <li><b>Deadlines</b> — event ends, event gacha, item exchange, last virtual show</li>
-        <li><b>Event tasks</b> — all episodes viewed, 10 full combos, final bonus reward</li>
+        <li><b>Event tasks</b> — the event's bonus missions, story episodes included, as a folded checklist</li>
         <li><b>Stamp missions &amp; shops</b> — collaboration and anniversary stamp missions, limited-time exchange shops</li>
-        <li><b>Extras</b> — mission pass bought and completed, the mission-pass progress advisor and its Colorful+ options, first 3 ranked matches, CN weekly badge, paid Connect Live shows</li>
+        <li><b>Extras</b> — mission pass bought and completed, the mission-pass progress advisor and its Colorful+ options, first 3 ranked matches, CN weekly badge, EN weekly missions, paid Connect Live shows</li>
         <li><b>Other gachas</b> — every concurrent banner, folded away, including the paid-crystal and Colorful+ ones</li>
+        <li><b>Crystals</b> — the 💎 badges saying what each task is worth (they need a one-time download, about 1 MB per server, and ask first)</li>
         <li><b>Export</b> — the +cal links and the .ics button</li>
       </ul>
       <p><b>Show everything</b> switches every row back on: the defaults.</p>
@@ -777,13 +796,14 @@ const STRINGS = {
     'tt.m.gone':'Leaves the event menu',
     'set.dataNote':'Sizes are the compressed bytes actually downloaded, checked against the server before each fetch. For scale: a full refresh is {total} for your selected servers, and gacha timing is the only large one.',
 
-    'grp.Deadlines':'Deadlines', 'grp.Event tasks':'Event tasks', 'grp.Extras':'Extras', 'grp.Gachas':'Gachas',
+    'grp.Deadlines':'Deadlines', 'grp.Event tasks':'Event tasks', 'grp.Extras':'Extras', 'grp.Gachas':'Gachas', 'grp.Crystals':'Crystals',
     'grp.Campaigns':'Stamp missions & shops',
     'row.stamps':'Stamp missions', 'row.mexchange':'Limited-time exchange shops',
     'row.mpadv':'Mission pass progress advisor', 'row.clive':'Connect Live (paid)',
     'row.aggregate':'Event ends / starts', 'row.gacha':'Event gacha', 'row.exchange':'Item exchange',
-    'row.vshow':'Last virtual show', 'row.episodes':'Viewed all event episodes',
-    'row.combo10':'10 full combos mission', 'row.finalreward':'Final bonus reward',
+    'row.vshow':'Last virtual show', 'row.bonus':'Bonus missions (story episodes included)',
+    'row.weekly':'Weekly missions (EN)',
+    'row.crystals':'💎 Crystal badges: what each task is worth (asks first: a one-time download, about 1 MB per server)',
     'row.pass':'Premium mission pass purchased', 'row.passdone':'Mission pass completed',
     'row.rank':'Ranked match qualification', 'row.badge':'Weekly badge exchange (CN)',
     'row.othergachas':'Other gachas list',
@@ -801,7 +821,8 @@ const STRINGS = {
     'col.refresh':'↻ refresh',
     'col.refreshing':'refreshing',
     'col.db':'DB {age}',
-    'col.gachaAge':'gacha {age}',
+    'col.gachaAge':'gacha {age}', 'col.crAge':'💎 {age}',
+    'cr.load':'💎 Load crystal amounts', 'cr.upTo':'up to {n}',
 
     'st.live':'live', 'st.today':'starts this server day', 'st.tomorrow':'starts next server day',
     'st.inDays':'starts in {n} server days', 'st.wrapping':'wrapping up', 'st.ended':'ended',
@@ -810,7 +831,7 @@ const STRINGS = {
 
     'rung.ends':'Event ends', 'rung.startsIn':'Event starts in', 'rung.starts':'Event starts',
     'rung.gacha':'Event gacha', 'rung.exchange':'Item exchange', 'rung.vshow':'Last virtual show',
-    'rung.approxClose':'≈ event close',
+    'rung.approxClose':'≈ event close', 'rung.bonus':'Bonus missions',
     'rung.cal':'+cal',
     'rung.meta':'{type} · starts {when}',
 
@@ -818,8 +839,8 @@ const STRINGS = {
     'task.episodes':'Viewed all event episodes',
     'task.combo10':'10 full combos mission',
     'task.finalreward':'Final bonus reward claimed',
-    'task.episodesShort':'{n} story eps', 'task.episodesShort0':'All story eps',
-    'task.combo10Short':'10 full combos', 'task.finalrewardShort':'All bonus claimed',
+    'grp.sum':'Missions · {d}/{n} complete',
+    'x.weekly':'Weekly missions',
 
     'v.following':'Following virtual show',
     'v.noneAfter':'No additional show after this one',
@@ -921,6 +942,7 @@ const STRINGS = {
     'res.core':'event, exchange, story and ranked data',
     'res.vlives':'virtual-show schedules',
     'res.gachas':'gacha timing for every banner',
+    'res.rewards':'crystal amounts for every reward',
     'size.now':'measured now', 'size.last':'size of the last check', 'size.est':'estimate',
 
     'b.unknown':'unknown size', 'b.B':'{n} B', 'b.KB':'{n} KB', 'b.MB':'{n} MB',
@@ -930,13 +952,17 @@ const STRINGS = {
     'e.ics':'📅 Export to calendar (.ics)…',
 
     'cal.starts':'Event starts', 'cal.aggregate':'Event ends', 'cal.gacha':'Event gacha ends',
-    'cal.exchange':'Item exchange closes', 'cal.vshow':'Last virtual show',
+    'cal.exchange':'Item exchange closes', 'cal.vshow':'Last virtual show', 'cal.bonus':'Bonus missions close',
+    'cal.weekly':'Weekly missions reset',
     'cal.pass':'Mission pass resets', 'cal.rank':'Ranked season ends', 'cal.badge':'Weekly badge exchange resets',
     'cal.gachaEnds':'{name} ends', 'cal.gachaStarts':'Event gacha opens', 'cal.vshowFirst':'First virtual show',
     'why.gachaStarts':'The event gacha ({name}) opens.',
     'why.vshowFirst':'The first showing of {name} begins.',
     'why.starts':'The event begins.',
     'why.aggregate':'The event ends: the point race closes.',
+    'why.bonus':'The event closes, and with it the bonus missions.',
+    'why.openN':'Still open: {d} of {n} missions.',
+    'why.weekly':'The weekly missions reset.',
     'why.open':'Not checked off yet: {list}.',
     'why.gacha':'The event gacha ({name}) leaves the shop.',
     'why.exchange':'The event\'s item exchange closes.',
@@ -1005,6 +1031,9 @@ const PREFS = Object.assign({servers:null, showSrv:true, theme:'system',
 })());
 if(PREFS.servers) PREFS.servers = PREFS.servers.filter(s=>SERVERS[s]);   // drop ids no longer in the registry
 // merge over the defaults so a row type added in a later version arrives switched on
+/* V43 folded the three event-task rows into one "bonus" row: someone who had switched all three
+   off keeps the list off */
+if(PREFS.rows && PREFS.rows.bonus===undefined && ['episodes','combo10','finalreward'].every(k=>PREFS.rows[k]===false)) PREFS.rows.bonus=false;
 PREFS.rows = Object.assign({}, DEFAULT_ROWS, PREFS.rows||{});
 // 'legacy' was retired in V29; anyone carrying it lands on the roomier of the two that remain
 if(PREFS.density==='legacy') PREFS.density='comfortable';
@@ -1061,7 +1090,9 @@ const rowDoneKey = r => r.dk || r.key;
    the other-gachas list: it was keyed by event, so ticking it there left the very same banner
    unticked in "Other gachas" once the column moved to the next event. */
 function doneKey(col,r){ return r.fk || `${col.server}|${col.event.id}|${rowDoneKey(r)}`; }
-function isDone(col,r){ return !!doneState[doneKey(col,r)]; }
+function isDone(col,r){
+  if(r.group) return r.group.length>0 && r.group.every(k=>!!doneState[k]);   // V42 bonus rung (full keys since V43)
+  return !!doneState[doneKey(col,r)]; }
 (function pruneDone(){ const cut=now()-14*86400000; let ch=false;
   for(const k in doneState){ if(doneState[k]<cut || k.endsWith('|_skipped')){ delete doneState[k]; ch=true; } }   // _skipped: V15-only, now session-scoped
   if(ch) saveDone(); })();
@@ -1096,10 +1127,20 @@ function srvClock(srv){ return `${SRV_LBL[srv]} ${new Date(now()).toLocaleString
 /* generic check-off row (episodes, missions, recurring resets) */
 function checkRow(key,label,endTs,opts){
   opts=opts||{};
-  const done=!!doneState[key];
+  /* opts.grp (V43): a group header, e.g. the weekly missions. It has no tick of its own: it is done
+     when every key in the group is, and its box ticks or unticks them all. */
+  const done = opts.grp ? opts.grp.length>0 && opts.grp.every(k=>!!doneState[k]) : !!doneState[key];
   const cd = opts.ddl ? `<span class="cd mono"${opts.start?` data-start="${opts.start}"`:''}${opts.sch?` data-sch="${opts.sch}"`:''} data-end="${endTs}">${done?'✓ done':''}</span>` : '';
+  const grp = opts.grp ? ` data-grp="${opts.grp.join(',')}" data-gid="${opts.gid}"` : '';
   // a <label> makes the whole row the tap target, which matters far more on a phone than the box
-  return `<label class="citem${done?' done':''}${opts.sub?' sub':''}" data-key="${key}" data-end="${endTs}"><input type="checkbox" class="ichk" ${done?'checked':''}><span class="ilabel">${label}</span>${cd}</label>`;
+  return `<label class="citem${done?' done':''}${opts.sub?' sub':''}" data-key="${key}"${grp} data-end="${endTs}"><input type="checkbox" class="ichk" ${done?'checked':''}><span class="ilabel">${label}</span>${cd}</label>`;
+}
+/* V43: a group's checklist, folded away by default, with its progress on the fold */
+function groupFold(gid, items, endTs){
+  if(!items.length) return '';
+  const d=items.filter(i=>doneState[i.key]).length;
+  return `<details class="dt sub grpfold" data-dt="grp-${gid}" data-for="${gid}"><summary class="grpsum">${t('grp.sum',{d, n:items.length})}</summary>
+    <div class="subwrap">${items.map(i=>checkRow(i.key, i.label, endTs, {sub:true})).join('')}</div></details>`;
 }
 
 /* slim to only the fields the app uses, so the whole cache stays well under the localStorage limit */
@@ -1114,6 +1155,8 @@ function slimVlives(arr, lo, hi){
   lo = lo ?? realNow()-30*86400000; hi = hi ?? realNow()+150*86400000;
   return arr.filter(v=>VL_KINDS.includes(v.virtualLiveType))
     .map(v=>({id:v.id,virtualLiveType:v.virtualLiveType,name:v.name,oa:v.startAt||null,
+      // V44: the reward for watching a scheduled show (the "archive" reward has no crystals)
+      rb:(((v.virtualLiveRewards||[]).find(r=>r.virtualLiveType==='normal'))||{}).resourceBoxId??null,
       virtualLiveSchedules:(v.virtualLiveSchedules||[]).map(s=>({seq:s.seq,startAt:s.startAt,endAt:s.endAt}))}))
     .filter(v=>v.virtualLiveSchedules.some(s=>s.startAt>=lo && s.startAt<=hi));
 }
@@ -1144,8 +1187,45 @@ function slimPM(arr){
     id:x.id, name:x.name, startAt:x.startAt, prog:x.progressEndAt||x.closedAt, closedAt:x.closedAt||x.progressEndAt,
     pages:(x.panelMissionSheetGroups||[]).slice().sort((a,b)=>(a.seq||0)-(b.seq||0)).flatMap(g=>{
       const sh=(g.panelMissionSheets||[]).slice().sort((a,b)=>(a.seq||0)-(b.seq||0));
-      return sh.map((p,i)=>({id:p.id, name: sh.length>1 ? `${g.name} ${i+1}` : g.name}));
+      // bx (V44): the page's rewards, its missions' and its completion reward, for the crystal badge
+      return sh.map((p,i)=>({id:p.id, name: sh.length>1 ? `${g.name} ${i+1}` : g.name,
+        bx: boxIds(p.rewards).concat((p.panelMissions||[]).flatMap(m=>boxIds(m.rewards)))}));
     })}));
+}
+/* V44: reward box ids from a rewards list, in any of the shapes the servers use:
+   [{resourceBoxId}] (EN/JP, most of CN), [[id]] or [[[id]]] (CN's compact missions) */
+function boxIds(rewards){
+  const out=[]; const walk=r=>{ if(Array.isArray(r)) r.forEach(walk); else if(typeof r==='number') out.push(r);
+    else if(r && r.resourceBoxId!=null) out.push(r.resourceBoxId); };
+  walk(rewards||[]); return out;
+}
+/* V43: each event's bonus missions (eventMissions.json, 8-90 KB). JP and CN list only those: the
+   seven "normal" missions and the final "complete all seven" one with its pick-one reward. EN also
+   lists daily and achievement event missions, a different screen in the game, so only its "bonus"
+   category is kept. CN wraps the reward box ids one level deeper ([[8002]]). Kept for the events
+   time travel can reach, like the other tables. */
+function slimMissions(arr, events){
+  const lo=realNow()-130*86400000, hi=realNow()+200*86400000;
+  const keep=new Set((events||[]).filter(e=>(e.closedAt||0)>=lo && (e.startAt||0)<=hi).map(e=>e.id));
+  const out={};
+  for(const m of arr||[]){
+    if(!keep.has(m.eventId)) continue;
+    const cat=m.eventMissionCategory||'';
+    if(cat==='daily' || cat==='achieve') continue;
+    const fin = !!m.eventMissionSelectableRewardGroupId || cat==='complete_selectable_reward' || /^achieve_(event|bonus)_mission$/.test(m.eventMissionType||'');
+    const box=boxIds(m.rewards);
+    (out[m.eventId]=out[m.eventId]||[]).push({id:m.id, seq:m.seq||0, type:m.eventMissionType||'', text:String(m.sentence||'').trim(),
+      fin, sel:m.eventMissionSelectableRewardGroupId||null, box});
+  }
+  for(const k in out) out[k].sort((a,b)=>(a.fin-b.fin)||(a.seq-b.seq));
+  return out;
+}
+/* V43: EN's weekly missions. The period has no real end (2099); the set resets every week. */
+function slimWeekly(ms, ps){
+  if(!Array.isArray(ms) || !Array.isArray(ps)) return null;
+  return { periods: ps.map(p=>({id:p.id, startAt:p.startAt, endAt:p.endAt})),
+    missions: ms.slice().sort((a,b)=>(a.seq||0)-(b.seq||0)).map(m=>({id:m.id, period:m.weeklyMissionPeriodGlId, text:String(m.sentence||'').trim(),
+      box:(m.rewards||[]).map(r=>r.resourceBoxId).filter(x=>x!=null)})) };
 }
 function slimMX(arr){
   const lo=realNow()-130*86400000, hi=realNow()+200*86400000;
@@ -1159,9 +1239,16 @@ function slimMX(arr){
    carries the browser's own Accept-Encoding, so the number is the *compressed* size — the bytes
    that actually cross the wire, which is what a metered-data warning should quote.
    Order of preference: live poke > size recorded from the last poke > baked-in estimate. */
-const CORE_FILES = ['events.json','eventExchangeSummaries.json','eventCards.json','eventStories.json','rankMatchSeasons.json','liveMissionPeriods.json'];
+const CORE_FILES = ['events.json','eventExchangeSummaries.json','eventCards.json','eventStories.json','rankMatchSeasons.json','liveMissionPeriods.json','eventMissions.json'];
 const RES_FILES = { core:CORE_FILES, vlives:['virtualLives.json'], gachas:['gachas.json'],
   specials:['panelMissionCampaigns.json','materialExchangeSummaries.json'], lmissions:['liveMissions.json'] };
+/* V44: the crystal amounts. The reward contents (EN/JP resourceBoxes.json ~1.1 MB compressed, CN's
+   compact details ~350 KB), the final bonus mission's pick-one rewards, and the mission-pass
+   missions (for the pass's free crystals) */
+function resFiles(s, res){
+  if(res!=='rewards') return RES_FILES[res];
+  return [SERVERS[s].quirks.compactBoxes ? 'compactResourceBoxDetails.json' : 'resourceBoxes.json', 'eventMissionSelectableRewards.json', 'liveMissions.json'];
+}
 function fmtBytes(n){
   if(n==null) return t('b.unknown');
   if(n<1024) return t('b.B',{n});
@@ -1170,7 +1257,7 @@ function fmtBytes(n){
 }
 async function pokeSize(server, res){
   try{
-    const sizes = await Promise.all(RES_FILES[res].map(async f=>{
+    const sizes = await Promise.all(resFiles(server, res).map(async f=>{
       const r = await fetch(`${RAW(server)}/${f}`, {method:'HEAD', cache:'no-store'});
       const v = r.ok ? r.headers.get('content-length') : null;
       return v==null ? null : +v;
@@ -1201,28 +1288,44 @@ async function sizeFor(server, res){
 /* ---------- data ---------- */
 async function loadServer(s){
   if(cache[s] && cache[s].events) return cache[s];
-  const [er,xr,cr,sr,rr,lr] = await Promise.all([
+  const wk = SERVERS[s].quirks.weeklyMissions;
+  const [er,xr,cr,sr,rr,lr,mr,wmr,wpr] = await Promise.all([
     fetch(`${RAW(s)}/events.json`,{cache:'no-store'}),
     fetch(`${RAW(s)}/eventExchangeSummaries.json`,{cache:'no-store'}).catch(()=>null),
     fetch(`${RAW(s)}/eventCards.json`,{cache:'no-store'}).catch(()=>null),
     fetch(`${RAW(s)}/eventStories.json`,{cache:'no-store'}).catch(()=>null),
     fetch(`${RAW(s)}/rankMatchSeasons.json`,{cache:'no-store'}).catch(()=>null),
-    fetch(`${RAW(s)}/liveMissionPeriods.json`,{cache:'no-store'}).catch(()=>null)
+    fetch(`${RAW(s)}/liveMissionPeriods.json`,{cache:'no-store'}).catch(()=>null),
+    fetch(`${RAW(s)}/eventMissions.json`,{cache:'no-store'}).catch(()=>null),
+    wk ? fetch(`${RAW(s)}/weeklyMissionGls.json`,{cache:'no-store'}).catch(()=>null) : null,
+    wk ? fetch(`${RAW(s)}/weeklyMissionPeriodGls.json`,{cache:'no-store'}).catch(()=>null) : null
   ]);
+  const okJson = async r => (r && r.ok) ? r.json().catch(()=>null) : null;
   if(!er.ok) throw new Error(`events ${er.status}`);
-  const exchange={}; if(xr&&xr.ok){ for(const x of await xr.json()) if(x.eventId) exchange[x.eventId]=x.endAt; }
+  const evRaw = await er.json();
+  // V44: the reward box ids behind the crystal badges, kept for the events time travel can reach
+  const lo=realNow()-130*86400000, hi=realNow()+200*86400000;
+  const keepEv=new Set(evRaw.filter(e=>(e.closedAt||0)>=lo && (e.startAt||0)<=hi).map(e=>e.id));
+  const exchange={}, exr={}; if(xr&&xr.ok){ for(const x of await xr.json()) if(x.eventId){ exchange[x.eventId]=x.endAt;
+    if(keepEv.has(x.eventId)) exr[x.eventId]=(x.eventExchanges||[]).filter(r=>r.resourceBoxId!=null).map(r=>[r.resourceBoxId, r.exchangeLimit||1]); } }
   const eventCards={}; if(cr&&cr.ok){ for(const x of await cr.json()){ (eventCards[x.eventId]=eventCards[x.eventId]||[]).push(x.cardId); } }
-  const episodes={}; if(sr&&sr.ok){ for(const x of await sr.json()){ if(x.eventId) episodes[x.eventId]=(x.eventStoryEpisodes||[]).length; } }
-  let seasons=[]; if(rr&&rr.ok){ seasons=(await rr.json()).map(z=>({id:z.id,name:z.name,startAt:z.startAt,aggregatedAt:z.aggregatedAt,closedAt:z.closedAt})); }
+  const episodes={}, epBox={}; if(sr&&sr.ok){ for(const x of await sr.json()){ if(!x.eventId) continue; const eps=x.eventStoryEpisodes||[];
+    episodes[x.eventId]=eps.length; if(keepEv.has(x.eventId)) epBox[x.eventId]=eps.flatMap(e=>boxIds(e.episodeRewards)); } }
+  let seasons=[]; if(rr&&rr.ok){ seasons=(await rr.json()).map(z=>({id:z.id,name:z.name,startAt:z.startAt,aggregatedAt:z.aggregatedAt,closedAt:z.closedAt,
+    tr:(z.rankMatchSeasonTierRewards||[]).map(r=>r.resourceBoxId).filter(x=>x!=null)})); }
   // the live-mission (mission pass) months: they run 00:00 -> 23:59:59 server time, not from 04:00
   let lmp=null; if(lr&&lr.ok){ lmp=(await lr.json()).map(z=>({id:z.id,startAt:z.startAt,endAt:z.endAt})); }
   cache[s]=cache[s]||{};
   if(lmp) cache[s].lmp=lmp; else cache[s].lmp=cache[s].lmp||[];
   cache[s].lmMax=cache[s].lmMax||{};
-  cache[s].events=slimEvents(await er.json());
+  cache[s].events=slimEvents(evRaw);
+  cache[s].missions=slimMissions(await okJson(mr), evRaw);
+  cache[s].weekly = wk ? slimWeekly(await okJson(wmr), await okJson(wpr)) : null;
   cache[s].exchange=exchange;
+  cache[s].exr=exr;
   cache[s].eventCards=eventCards;
   cache[s].episodes=episodes;
+  cache[s].epBox=epBox;
   cache[s].seasons=seasons;
   cache[s].vlives=cache[s].vlives||null;
   cache[s].gachas=cache[s].gachas||null;
@@ -1283,7 +1386,72 @@ async function loadLMMax(s){
   }catch{ c.lmFailed=true; }
   finally{ c.lmLoading=false; }
 }
+/* ---------- V44: crystal amounts (opt-in, like gacha timing) ----------
+   Every amount comes from the game's own reward contents, never a guess. Only the purposes the
+   badges use are kept, as {box id: crystals} (0 when a box holds none), a few thousand numbers. */
+const CR_PURPOSE = { episode_reward:'ep', event_exchange:'ex', virtual_live_reward:'vl', mission_reward:'ms',
+  event_mission_selectable_reward:'sel', rank_match_season_tier_reward:'rk' };
+function slimBoxes(raw){
+  const cr={ep:{},ex:{},vl:{},ms:{},sel:{},rk:{}};
+  if(Array.isArray(raw)){   // EN/JP resourceBoxes.json: one object per box, contents in `details`
+    for(const b of raw){ const k=CR_PURPOSE[b.resourceBoxPurpose]; if(!k) continue;
+      let j=0; for(const d of (b.details||b.resourceBoxDetails||[])) if(d.resourceType==='jewel') j+=d.resourceQuantity||0;
+      cr[k][b.id]=j; }
+  } else if(raw && raw.__ENUM__){   // CN compactResourceBoxDetails.json: one column per field, enums by index
+    const E=raw.__ENUM__, P=E.resourceBoxPurpose||[], T=E.resourceType||[], ids=raw.resourceBoxId||[];
+    for(let i=0;i<ids.length;i++){ const k=CR_PURPOSE[P[raw.resourceBoxPurpose[i]]]; if(!k) continue;
+      const m=cr[k], id=ids[i]; m[id]=(m[id]||0) + (T[raw.resourceType[i]]==='jewel' ? (raw.resourceQuantity[i]||0) : 0); }
+  }
+  return cr;
+}
+async function loadRewards(s){
+  const c=cache[s]; if(!c) return;
+  const [bf, sf, lf] = resFiles(s,'rewards');
+  const get=f=>fetch(`${RAW(s)}/${f}`,{cache:'no-store'}).then(r=>r.ok?r.json():null);
+  const [boxes, sel, lms] = await Promise.all([get(bf), get(sf).catch(()=>null), get(lf).catch(()=>null)]);
+  if(!boxes) throw new Error('reward contents unavailable');
+  c.cr=slimBoxes(boxes);
+  c.selg={}; for(const x of sel||[]) (c.selg[x.groupId]=c.selg[x.groupId]||[]).push(x.resourceBoxId);
+  if(lms){   // the pass's free track, per month; also the month's points, which the advisor uses
+    const mx={}, lb={};
+    for(const m of lms){ const p=m.liveMissionPeriodId;
+      if(m.liveMissionType==='free') mx[p]=Math.max(mx[p]||0, m.requirement||0);
+      if(m.liveMissionType==='free' || m.liveMissionType==='premium') ((lb[p]=lb[p]||{free:[],premium:[]})[m.liveMissionType]).push(...boxIds(m.rewards)); }
+    c.lmMax=Object.assign(c.lmMax||{}, mx); c.lmBox=lb;
+  }
+  c.fetchedAt=c.fetchedAt||{}; c.fetchedAt.rewards=realNow();
+  persist(s);
+}
+const STALE_REWARDS=14*86400000;
+const crOn = S => rowOn('crystals') && !!(cache[S] && cache[S].cr);
+/* crystals in boxes of one purpose (times a count each, for exchange limits); null when none of the
+   boxes is known yet, e.g. a new event's, until the amounts are refreshed */
+function crSum(S, k, ids, mult){
+  const m=(cache[S].cr||{})[k]||{}; let t=0, known=false;
+  (ids||[]).forEach((id,i)=>{ if(id in m){ known=true; t+=m[id]*(mult?mult[i]:1); } });
+  return known ? t : null;
+}
+const cbadge = (n, upTo) => n>0 ? ` <span class="cbadge">💎 ${upTo ? t('cr.upTo',{n:nfmt(n)}) : nfmt(n)}</span>` : '';
+const cbadgeRange = (a, b) => b>0 ? ` <span class="cbadge">💎 ${a===b ? nfmt(b) : `${nfmt(a)}–${nfmt(b)}`}</span>` : '';
+/* what one bonus mission is worth: its own reward; the final mission's pick-one reward at most
+   (100 crystals is one of the options); reading the last story episode also brings the episodes' */
+function missionCrystals(S, ev, m){
+  if(m.fin){ const opts=((cache[S].selg||{})[m.sel])||[]; const v=opts.map(b=>crSum(S,'sel',[b])).filter(x=>x!=null);
+    return {n: v.length ? Math.max(...v) : null, upTo:true}; }
+  let n=crSum(S,'ms',m.box);
+  if(m.type==='read_last_event_story_episode'){ const e=crSum(S,'ep',(cache[S].epBox||{})[ev.id]); if(e!=null) n=(n||0)+e; }
+  return {n, upTo:false};
+}
 function curPeriod(S){ const n=now(); return ((cache[S]&&cache[S].lmp)||[]).find(p=>p.startAt<=n && n<=p.endAt) || null; }
+/* V43: the weekly missions running now, and when they next reset: the weekday and hour their period
+   started, in server time (EN: Monday 04:00 PT), so a DST change keeps the local hour */
+function weeklyNow(S){
+  const w=cache[S] && cache[S].weekly; if(!w || !w.periods) return null;
+  const n=now(), p=w.periods.find(x=>x.startAt<=n && n<x.endAt); if(!p) return null;
+  const tz=SRV_TZ[S], reset=nextWeekly(tz, tzParts(p.startAt,tz).weekday, tzYMDH(p.startAt,tz).h);
+  const items=w.missions.filter(m=>m.period===p.id).map(m=>({key:`${S}|WK|${reset}|${m.id}`, label:esc(m.text), m}));
+  return items.length ? {reset, items} : null;
+}
 /* the pass resets when the next live-mission month starts; the 04:00 guess is only the fallback */
 function passResetAt(S){ const p=curPeriod(S); return p ? p.endAt+1000 : nextMonthlyReset(SRV_TZ[S]); }
 
@@ -1433,6 +1601,44 @@ function applyGachas(col){
 }
 
 /* deadlines for a column's selected event */
+/* V42: the bonus missions run until the event CLOSES, not until the point race ends: the JP client
+   shows "11/25 14:59まで" for event 226, which is its closedAt, and the author confirmed every bonus
+   mission, the full-combo one included, can be completed until then.
+   V43: the list is the event's real missions from eventMissions.json (reading the last story
+   episode is one of them, so the episodes tick joined it), each with the game's own wording. An
+   event the data has no missions for falls back to the three generic ticks the tool had before,
+   under their old keys. */
+const LEGACY_TASKS = ['episodes','combo10','finalreward'];
+function bonusItems(col){
+  const ev=col.event, S=col.server, c=cache[S]||{}; if(!ev) return [];
+  const ms=(c.missions||{})[ev.id], on=crOn(S);
+  if(ms && ms.length) return ms.map(m=>{ const v=on ? missionCrystals(S,ev,m) : {n:null};
+    return {key:`${S}|${ev.id}|bm${m.id}`, label:esc(m.text)+cbadge(v.n, v.upTo), m, cr:v}; });
+  const ep=(c.episodes||{})[ev.id]||0;
+  return LEGACY_TASKS.map(k=>{ const v={n: on && k==='episodes' ? crSum(S,'ep',(c.epBox||{})[ev.id]) : null};
+    return {key:`${S}|${ev.id}|${k}`, cr:v,
+      label:(k==='episodes' ? (ep>0 ? t('task.episodesN',{n:ep}) : t('task.episodes')) : t('task.'+k)) + cbadge(v.n)}; });
+}
+/* V44: the badge beside a rung's title: what completing it is worth */
+function rungBadge(col, r){
+  const S=col.server, ev=col.event; if(!crOn(S)) return '';
+  if(r.key==='exchange'){ const x=(cache[S].exr||{})[ev.id]||[]; return cbadge(crSum(S,'ex', x.map(a=>a[0]), x.map(a=>a[1]))); }
+  if(r.key==='vshow'){ const v=selectedVlive(col); return v ? cbadge(crSum(S,'vl',[v.rb])) : ''; }
+  if(r.key==='bonus'){ const items=bonusItems(col); let n=0, up=false;
+    for(const i of items){ if(i.cr && i.cr.n){ n+=i.cr.n; if(i.cr.upTo) up=true; } }
+    return cbadge(n, up); }
+  return '';
+}
+/* ticks made on the generic V42 rows carry over to the missions they stood for */
+function carryLegacyTicks(col){
+  const ev=col.event, S=col.server, ms=((cache[S]||{}).missions||{})[ev && ev.id]; if(!ms || !ms.length) return;
+  const target={ episodes: ms.find(m=>m.type==='read_last_event_story_episode'),
+                 combo10: ms.find(m=>m.type==='live_clear_full_combo'), finalreward: ms.find(m=>m.fin) };
+  let ch=false;
+  for(const k of LEGACY_TASKS){ const o=`${S}|${ev.id}|${k}`, m=target[k]; if(!doneState[o] || !m) continue;
+    const nk=`${S}|${ev.id}|bm${m.id}`; if(!doneState[nk]) doneState[nk]=ev.closedAt; delete doneState[o]; ch=true; }
+  if(ch) saveDone();
+}
 function deadlinesFor(col){
   const ev=col.event; if(!ev) return [];
   const exEnd=exchangeEnd(col.server,ev);
@@ -1445,6 +1651,11 @@ function deadlinesFor(col){
     pending
       ? {key:'aggregate', em:'🏁', label:t('rung.startsIn'), calLabel:t('rung.starts'), start:ev.startAt, at:ev.startAt, end:ev.aggregateAt, bare:true}
       : {key:'aggregate', em:'🏁', label:t('rung.ends'),     end:ev.aggregateAt},
+    /* its own rung with one countdown to the close and its missions folded underneath. It has no
+       tick of its own: `group` holds the missions' keys, it counts as done when they all are, and
+       its checkbox ticks or unticks them all. */
+    {key:'bonus', em:'🎯', label:t('rung.bonus'), end:ev.closedAt, start: pending ? ev.startAt : 0,
+         group: bonusItems(col).map(i=>i.key)},
     g ? {key:'gacha', em:'🎰', label:t('rung.gacha'),    start:g.startAt, end:g.endAt, note:g.name,
          fk:`${col.server}|G|${g.id}`, gid:g.id, skip: noCeil(col.server) && g.j===1} : null,
     {key:'exchange',  em:'🛒', label:t('rung.exchange'),  end: exEnd ?? ev.closedAt, note: exEnd? null : t('rung.approxClose')},
@@ -1471,8 +1682,8 @@ function renderSig(col){
     for(const x of (c.mx||[])){ if(x.startAt-3*86400000<=n) xs++; if(x.endAt<=n) xs++; }
     for(const v of (c.vlives||[])){ if(v.virtualLiveType!=='streaming') continue; const w=cliveWindow(v); if(w && w.from<=n) xs++; if(w && w.last<=n) xs++; }
   }
-  const p=curPeriod(col.server), ln=liveNextOf(col);
-  return `${v?v.id:''}|${st.k}|${st.t}|${gs}|${xs}|${p?p.id:''}|${ln?ln.id:''}`;
+  const p=curPeriod(col.server), ln=liveNextOf(col), wm=weeklyNow(col.server);   // a weekly reset brings a fresh list (V43)
+  return `${v?v.id:''}|${st.k}|${st.t}|${gs}|${xs}|${p?p.id:''}|${ln?ln.id:''}|${wm?wm.reset:''}`;
 }
 /* a later event that is live while this column shows one that has ended */
 function liveNextOf(col){
@@ -1490,14 +1701,14 @@ function cliveWindow(v){
 }
 
 /* ---------- "everything for this event is checked" → offer the next event ---------- */
-/* scope is deliberately the event's own tasks only: the rungs currently shown plus whichever
-   sub-tasks are shown. Extras are recurring, and "other gachas" aren't event-scoped, so neither
-   counts. A muted row type is not a task the user still owes, so it drops out of the scope too. */
-const EVENT_SUBTASKS = ['episodes','combo10','finalreward'];
+/* scope is deliberately the event's own tasks only: the rungs currently shown plus the bonus
+   missions. Extras are recurring, and "other gachas" aren't event-scoped, so neither counts. A
+   muted row type is not a task the user still owes, so it drops out of the scope too. */
 /* a muted event gacha (no full guarantee saved) is not something the user still owes */
 function eventTaskKeys(col){
-  const p=`${col.server}|${col.event.id}|`;
-  return deadlinesFor(col).filter(r=>!r.skip).map(r=>doneKey(col,r)).concat(EVENT_SUBTASKS.filter(rowOn).map(k=>p+k));
+  // the bonus rung has no tick of its own; its missions count one by one (V43)
+  const rows=deadlinesFor(col);
+  return rows.filter(r=>!r.skip && !r.group).map(r=>doneKey(col,r)).concat(rows.filter(r=>r.group).flatMap(r=>r.group));
 }
 function allEventDone(col){ const k=eventTaskKeys(col); return k.length>0 && k.every(x=>!!doneState[x]); }
 /* Staying is in-memory only, so the prompt is back after a reload. Moving on is the
@@ -1526,6 +1737,28 @@ function wireAllDone(col){
   const rb=ao.querySelector('.aorefresh');
   if(rb) rb.onclick=async()=>{ rb.disabled=true; rb.innerHTML=`<span class="spin"></span>${t('ov.checking')}`; try{ await refreshCore(col); }catch(e){ rb.disabled=false; rb.textContent=t('col.retry'); } };
 }
+/* V42/V43: a group header (the bonus rung, the weekly-missions row) follows its missions in place:
+   ticked and "✓ done" when all are done, its fold's "x/y complete" kept current, and its missions'
+   rows following a tick on the header's own box. No re-render, so nothing moves. */
+function syncGroups(col){
+  const b=body(col);
+  b.querySelectorAll('[data-grp]').forEach(h=>{
+    const keys=h.dataset.grp ? h.dataset.grp.split(',') : [];
+    for(const key of keys){ const on=!!doneState[key];
+      b.querySelectorAll(`.citem[data-key="${key}"]`).forEach(el=>{ el.classList.toggle('done', on); const c=el.querySelector('.ichk'); if(c) c.checked=on; });
+    }
+    const d=keys.filter(k=>!!doneState[k]).length, all=keys.length>0 && d===keys.length;
+    h.classList.toggle('done', all);
+    const chk=h.querySelector('.rchk,.ichk'); if(chk) chk.checked=all;
+    const cd=h.querySelector('.cd'); if(cd){ if(all){ cd.textContent='✓ done'; cd.className='cd mono c-done'; } else tickEl(cd); }
+    const sum=b.querySelector(`.grpfold[data-for="${h.dataset.gid}"] > .grpsum`); if(sum) sum.textContent=t('grp.sum',{d, n:keys.length});
+  });
+}
+/* a header's box ticks or unticks every mission in its group */
+function tickGroup(col, h, on){
+  for(const k of (h.dataset.grp||'').split(',').filter(Boolean)){ if(on) doneState[k]=+h.dataset.end; else delete doneState[k]; }
+  saveDone(); syncGroups(col); syncAllDone(col);
+}
 /* re-evaluate after a check-off without rebuilding the whole column */
 function syncAllDone(col){
   // unticking something on an event you had moved on from means it is not finished after all
@@ -1547,7 +1780,7 @@ function confirmFetch(server, res){
     const {bytes, kind} = await sizeFor(server, res);
     if(bytes==null || bytes<=PREFS.warnBytes) return resolve(true);
     const fa=(cache[server]&&cache[server].fetchedAt)||{};
-    const last = res==='gachas' ? fa.gachas : res==='vlives' ? fa.vlives : fa.core;
+    const last = res==='gachas' ? fa.gachas : res==='vlives' ? fa.vlives : res==='rewards' ? fa.rewards : fa.core;
     const wrap=document.createElement('div');
     wrap.className='modal';
     wrap.innerHTML=`<div class="modalbox">
@@ -1622,6 +1855,14 @@ async function prepEvent(col){
   col.vMatches = matchVlives(vl, col.event);
   col.vshowId='auto';
   applyGachas(col);
+}
+/* V44: the crystal amounts, after the same size prompt the gacha timing uses */
+async function doLoadRewards(col, btn){
+  if(btn){ btn.disabled=true; btn.textContent=t('g.checking'); }
+  if(!await confirmFetch(col.server,'rewards')){ renderColumn(col); return; }
+  if(btn) btn.innerHTML=`<span class="spin"></span>${t('g.downloading')}`;
+  try{ await loadRewards(col.server); renderColumn(col); }
+  catch(e){ if(btn){ btn.disabled=false; btn.textContent=t('col.retry'); } }
 }
 async function doLoadGachas(col){
   const btn = body(col).querySelector('.gload');
@@ -1804,6 +2045,7 @@ function renderColumn(col){
   // a tick made on the event gacha before V34 lived under an event-scoped key; carry it over once
   const gr=rows.find(r=>r.key==='gacha');
   if(gr){ const old=`${col.server}|${ev.id}|gacha`; if(doneState[old] && !doneState[gr.fk]){ doneState[gr.fk]=doneState[old]; delete doneState[old]; saveDone(); } }
+  carryLegacyTicks(col);
   const rungHtml = rows.map(r=>{
     const startAttr = r.start? ` data-start="${r.start}"`:'';
     const done = isDone(col,r);
@@ -1822,35 +2064,17 @@ function renderColumn(col){
     }
     const at = r.at ?? r.end;                       // the timestamp this row is actually about
     const art = r.key==='gacha' && artOn() ? gachaArt(col.server, r.gid, 'gart') : '';
-    const main = `<div class="rung${done?' done':''}${r.skip?' skipped':''}" data-key="${rowDoneKey(r)}" data-fk="${doneKey(col,r)}" data-end="${r.end}">
-      <div class="rl"><label class="rlab"><input type="checkbox" class="rchk" ${done?'checked':''}><span class="rlabel"><span class="em">${r.em}</span>${r.label}${labelExtra}</span></label>${rowOn('cal')?`<span class="cal" data-ci="r:${rowDoneKey(r)}">${t('rung.cal')}</span>`:''}</div>
+    const main = `<div class="rung${done?' done':''}${r.skip?' skipped':''}" data-key="${rowDoneKey(r)}" data-fk="${doneKey(col,r)}"${r.group?` data-grp="${r.group.join(',')}" data-gid="${r.key}"`:''} data-end="${r.end}">
+      <div class="rl"><label class="rlab"><input type="checkbox" class="rchk" ${done?'checked':''}><span class="rlabel"><span class="em">${r.em}</span>${r.label}${labelExtra}${rungBadge(col,r)}</span></label>${rowOn('cal')?`<span class="cal" data-ci="r:${rowDoneKey(r)}">${t('rung.cal')}</span>`:''}</div>
       ${r.note?`<div class="rnote">${r.note}</div>`:''}${r.skip?`<div class="rnote skipnote">${t('g.skipNote')}</div>`:''}${art}
       <div class="rb"><span class="rt mono">${fmtLocal(at)}${showSrv?` · ${fmtSrv(at,col.server)}`:''}</span><span class="cd mono"${startAttr}${r.bare?' data-bare':''}${r.skip?' data-grey':''} data-end="${r.end}">${done?'✓ done':''}</span></div>
       ${rungExtra}
     </div>`;
     let subs='';
-    if(r.key==='aggregate'){
-      const ep=(c.episodes||{})[ev.id]||0;
-      let items='';
-      const subDefs = [
-        ['episodes',    ep>0?t('task.episodesN',{n:ep}):t('task.episodes'),
-                        ep>0?t('task.episodesShort',{n:ep}):t('task.episodesShort0')],
-        ['combo10',     t('task.combo10'),     t('task.combo10Short')],
-        ['finalreward', t('task.finalreward'), t('task.finalrewardShort')],
-      ].filter(([k])=>rowOn(k));
-      if(isCompact()){
-        /* one wrapping row of toggle chips instead of three full-width checkbox rows. No checkbox:
-           done state reads as muted + struck through, which is the same signal the rest of the
-           tool already uses and costs a third of the height. */
-        const chips = subDefs.map(([k,,short])=>{
-          const key=`${col.server}|${ev.id}|${k}`, dn=!!doneState[key];
-          return `<button type="button" class="tchip${dn?' done':''}" data-key="${key}" data-end="${ev.aggregateAt}" aria-pressed="${dn}">${short}</button>`;
-        }).join('');
-        if(chips) subs += `<div class="tchips">${chips}</div>`;
-      } else {
-        const items = subDefs.map(([k,label])=>checkRow(`${col.server}|${ev.id}|${k}`, label, ev.aggregateAt, {sub:true})).join('');
-        if(items) subs += `<div class="subwrap">${items}</div>`;
-      }
+    if(r.key==='bonus'){
+      /* V43: every bonus mission of the event, story episodes included, as a checklist folded away
+         by default in both densities, with "x/y complete" on the fold */
+      subs += groupFold('bonus', bonusItems(col), ev.closedAt);
     } else if(r.key==='vshow'){
       const vv=selectedVlive(col);
       subs += vv ? buildVshowDetail(col, vv, ev)
@@ -1879,7 +2103,11 @@ function renderColumn(col){
      bigger and nothing is lost. */
   const cacheLine = `<div class="cacheline">
     <span class="cachebtns"><button class="btn xs refresh${coreStale?' stale':''}">↻ <span class="age-core">${t('col.db',{age:ageStr(fa.core)})}</span></button>${
-      c.gachas?`<button class="btn xs grefresh${gStaleTop?' stale':''}">↻ <span class="age-gacha">${t('col.gachaAge',{age:ageStr(fa.gachas)})}</span></button>`:''}</span>
+      c.gachas?`<button class="btn xs grefresh${gStaleTop?' stale':''}">↻ <span class="age-gacha">${t('col.gachaAge',{age:ageStr(fa.gachas)})}</span></button>`:''}${
+      /* V44: crystal amounts are opt-in; until loaded this is the button that asks for them */
+      !rowOn('crystals') ? '' : c.cr
+        ? `<button class="btn xs crefresh${fa.rewards && now()-fa.rewards>STALE_REWARDS?' stale':''}">↻ <span class="age-cr">${t('col.crAge',{age:ageStr(fa.rewards)})}</span></button>`
+        : `<button class="btn xs crload">${t('cr.load')}</button>`}</span>
     ${showSrv?'<span class="srvclock mono"></span>':''}
   </div>`;
 
@@ -1897,15 +2125,27 @@ function renderColumn(col){
   }
   let extras='';
   if(rowOn('pass')) extras += checkRow(`${col.server}|pass|${passReset}`, t('x.pass'), passReset, {ddl:true});
-  if(rowOn('passdone')) extras += checkRow(`${col.server}|passdone|${passReset}`, t('x.passdone'), passReset, {ddl:true});
+  // V44: finishing the pass is worth the free track's crystals (the premium track's need the pass)
+  const lmB = crOn(col.server) && curPeriod(col.server) ? (c.lmBox||{})[curPeriod(col.server).id] : null;
+  if(rowOn('passdone')) extras += checkRow(`${col.server}|passdone|${passReset}`, t('x.passdone') + (lmB ? cbadge(crSum(col.server,'ms',lmB.free)) : ''), passReset, {ddl:true});
   if(rowOn('mpadv')) extras += mpHtml(col);
   const wb=SERVERS[col.server].quirks.weeklyBadge;   // CN today; the mechanism is server-agnostic
   if(wb && rowOn('badge')){ const wk=nextWeekly(SRV_TZ[col.server],wb.weekday,wb.hour); extras += checkRow(`${col.server}|badge|${wk}`, wb.label, wk, {ddl:true}); }
+  /* V43: EN's weekly missions, a header counting down to the weekly reset with the missions folded
+     underneath. The ticks are keyed by the reset, so they clear themselves each week. */
+  const wm=weeklyNow(col.server);
+  if(wm && rowOn('weekly')){
+    extras += checkRow(`${col.server}|WK|${wm.reset}`, t('x.weekly'), wm.reset, {ddl:true, grp:wm.items.map(i=>i.key), gid:'weekly'});
+    extras += groupFold('weekly', wm.items, wm.reset);
+  }
   /* Ranked is a crystal row, not a "season ends" notice: 150-300 crystals land once you have
      played enough matches to be given a ranking, which in practice is the season's first three.
      The key is unchanged, so it still auto-resets per season. */
   const rs=currentSeason(col);
-  if(rs && rowOn('rank')) extras += checkRow(`${col.server}|rank|${rs.id}`, t('x.rank',{season:rs.name}), rs.aggregatedAt, {ddl:true});
+  // V44: the season reward depends on the tier reached; the badge gives the range
+  const rkv = rs && crOn(col.server) ? (rs.tr||[]).map(b=>crSum(col.server,'rk',[b])).filter(x=>x!=null) : [];
+  const rkB = rkv.length ? cbadgeRange(Math.min(...rkv), Math.max(...rkv)) : '';
+  if(rs && rowOn('rank')) extras += checkRow(`${col.server}|rank|${rs.id}`, t('x.rank',{season:rs.name}) + rkB, rs.aggregatedAt, {ddl:true});
   /* Connect Live: the paid streamed concerts ("streaming" virtual lives). They never counted toward
      the virtual-show rung, which is about free shows. Listed from announcement to the last show. */
   if(rowOn('clive')) for(const v of (c.vlives||[]).filter(v=>v.virtualLiveType==='streaming')){
@@ -1949,6 +2189,7 @@ function renderColumn(col){
   b.querySelector('.epick').onchange = async e=>{ col.event=col.events.find(x=>String(x.id)===e.target.value); await prepEvent(col); renderColumn(col); };
   const vsel=b.querySelector('.vsel'); if(vsel){ vsel.value=col.vshowId; vsel.onchange=e=>{col.vshowId=e.target.value; renderColumn(col);}; }
   const gl=b.querySelector('.gload'); if(gl) gl.onclick=()=>doLoadGachas(col);
+  b.querySelectorAll('.crload, .crefresh').forEach(el=>el.onclick=()=>doLoadRewards(col, el));
   b.querySelectorAll('.rl .cal').forEach(el=>el.onclick=e=>{ e.preventDefault(); openCal(col, el.dataset.ci); });
   const hg=b.querySelector('.hintgo');
   if(hg) hg.onclick=async()=>{ const nx=liveNextOf(col); if(!nx) return;
@@ -1957,6 +2198,7 @@ function renderColumn(col){
   wireMP(col);
   b.querySelectorAll('.rchk').forEach(chk=>chk.onchange=e=>{
     const rung=e.target.closest('.rung'), key=rung.dataset.fk;
+    if(rung.dataset.grp!==undefined){ tickGroup(col, rung, e.target.checked); return; }   // the bonus rung (V42)
     if(e.target.checked){ doneState[key]=+rung.dataset.end; } else { delete doneState[key]; }
     saveDone();
     rung.classList.toggle('done', e.target.checked);
@@ -1971,17 +2213,18 @@ function renderColumn(col){
     saveDone();
     el.classList.toggle('done', on); el.setAttribute('aria-pressed', String(on));
     const pmc=el.closest('.pmc'); if(pmc){ syncPmc(pmc); return; }   // a stamp page: its own block only
-    syncAllDone(col);
+    syncGroups(col); syncAllDone(col);
   });
   b.querySelectorAll('.ichk').forEach(chk=>chk.onchange=e=>{
     const item=e.target.closest('.citem'), key=item.dataset.key;
+    if(item.dataset.grp!==undefined){ tickGroup(col, item, e.target.checked); return; }   // a group header (V43)
     if(e.target.checked){ doneState[key]=+item.dataset.end; } else { delete doneState[key]; }
     saveDone();
     item.classList.toggle('done', e.target.checked);
     const cd=item.querySelector('.cd');
     if(cd){ if(e.target.checked){ cd.textContent='✓ done'; cd.className='cd mono c-done'; } else { tickEl(cd); } }
     const pmc=item.closest('.pmc'); if(pmc){ syncPmc(pmc); return; }   // its own block only
-    if(item.classList.contains('sub')) syncAllDone(col);
+    if(item.classList.contains('sub')){ syncGroups(col); syncAllDone(col); }
   });
   const eics=b.querySelector('.eics'); if(eics) eics.onclick=()=>exportIcs(col);
   if(c.gachas) wireGacha(col);
@@ -2005,6 +2248,9 @@ function refreshCacheLine(col){
   // a button mid-refresh is disabled and showing a spinner; leave it alone until it finishes
   const rb=cl.querySelector('.refresh');   if(rb && !rb.disabled) rb.classList.toggle('stale', coreStale);
   const gb=cl.querySelector('.grefresh');  if(gb && !gb.disabled) gb.classList.toggle('stale', gStale);
+  const ac2=cl.querySelector('.age-cr');
+  if(ac2){ const txt=t('col.crAge',{age:ageStr(fa.rewards)}); if(ac2.textContent!==txt) ac2.textContent=txt; }
+  const cb=cl.querySelector('.crefresh'); if(cb && !cb.disabled) cb.classList.toggle('stale', !!fa.rewards && now()-fa.rewards>STALE_REWARDS);
 }
 
 /* ---------- artwork (Comfortable view, opt-in) ----------
@@ -2059,7 +2305,8 @@ function spHtml(col){
     const notes=[`<span class="pmcount">${pmCount(d, pm.pages.length)}</span>`];
     if(ended) notes.push(t('sp.claimNow'));
     else if(pm.closedAt-pm.prog > 3600000) notes.push(t('sp.claim',{closed:fmtLocal(pm.closedAt)}));
-    h+=`<div class="pmc${all?' done':''}" data-pm="${pm.id}"><div class="pmh"><span class="pmn">${esc(pm.name)}</span><span class="pmcd"><span class="cd mono${all?' c-done':''}" data-start="${pm.startAt}" data-end="${target}">${all?'✓ done':''}</span></span></div>
+    const pmCr = crOn(S) ? cbadge(crSum(S,'ms', pm.pages.flatMap(p=>p.bx||[]))) : '';   // V44; many stamp missions pay no crystals at all
+    h+=`<div class="pmc${all?' done':''}" data-pm="${pm.id}"><div class="pmh"><span class="pmn">${esc(pm.name)}</span>${pmCr}<span class="pmcd"><span class="cd mono${all?' c-done':''}" data-start="${pm.startAt}" data-end="${target}">${all?'✓ done':''}</span></span></div>
       <div class="rnote">${notes.join(' · ')}</div>${pm.pages.length>8
         ? `<details class="dt sub" data-dt="pm${pm.id}"><summary>${t('sp.pages',{n:pm.pages.length})}</summary>${pages}</details>`
         : pages}</div>`;
@@ -2382,16 +2629,17 @@ function calItems(col, all){
   const why=(k,p)=>t('why.'+k,p);
   // "PJSK" up front, so the entry says what it is among everything else in a calendar
   const tag=`[PJSK ${S}]`;
-  const endWhy=()=>{
-    const open=EVENT_SUBTASKS.filter(rowOn).filter(k=>!doneState[`${S}|${ev.id}|${k}`]).map(k=>t('task.'+k));
-    return why('aggregate') + (open.length ? '\n'+why('open',{list:open.join(', ')}) : '');
-  };
+  // the bonus-missions entry says how many missions are still open (V43); the event end has none of its own now
+  const endWhy=()=>why('aggregate');
+  const bonusWhy=r=>{ const n=r.group.length, d=r.group.filter(k=>!doneState[k]).length;
+    return why('bonus') + (d ? '\n'+why('openN',{d, n}) : ''); };
   // `optional` entries are offered but start unticked; see exportIcs
   const add=(id,uid,at,kind,whyTxt,more)=>out.push(Object.assign({id, uid:`${ev.id}-${uid}`, group:'deadlines', at,
     done:false, title:`${tag} ${t('cal.'+kind)} · ${ev.name}`, why:whyTxt, withEvent:true}, more));
   deadlinesFor(col).forEach(r=>{
     const kind = r.key==='aggregate' && r.at ? 'starts' : r.key;
     const w = kind==='aggregate' ? endWhy()
+            : kind==='bonus' ? bonusWhy(r)
             : kind==='gacha' ? why('gacha',{name:r.note})
             : kind==='vshow' ? (selectedVlive(col) ? why('vshow',{name:selectedVlive(col).name}) : why('approx'))
             : kind==='exchange' ? why('exchange') + (r.note ? '\n'+why('approx') : '')
@@ -2415,6 +2663,9 @@ function calItems(col, all){
   if(rs && rowOn('rank')) extra(`rank|${rs.id}`,rs.aggregatedAt,`${t('cal.rank')} · ${rs.name}`,why('rank',{name:rs.name}));
   const wb=SERVERS[S].quirks.weeklyBadge;
   if(wb && rowOn('badge')){ const wk=nextWeekly(SRV_TZ[S],wb.weekday,wb.hour); extra(`badge|${wk}`,wk,t('cal.badge'),why('badge')); }
+  const wm=weeklyNow(S);
+  if(wm && rowOn('weekly')) out.push({id:`x:WK|${wm.reset}`, uid:`WK|${wm.reset}`, group:'extras', at:wm.reset,
+    done:wm.items.every(i=>!!doneState[i.key]), title:`${tag} ${t('cal.weekly')}`, why:why('weekly')});
   const n=now();
   if(rowOn('stamps')) (cache[S].pm||[]).filter(x=>x.startAt-SP_LEAD<=n && n<x.prog).forEach(x=>
     extra(`PMC|${x.id}`, x.prog, t('cal.pm',{name:x.name}), why('pm',{name:x.name})));

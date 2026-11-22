@@ -57,8 +57,11 @@ again any time from Settings → Testing & setup.
 
 For your current event on each selected server:
 
-- **Event ends** — the grind cutoff, with the sub-tasks that carry crystals: event episodes, the
-  10-full-combos mission, and the final bonus reward.
+- **Event ends** — the grind cutoff.
+- **Bonus missions** — every bonus mission of the event, in the game's own wording (reading the last
+  story episode is one of them), as a checklist folded away under one row, with "x/y complete" on
+  the fold. They stay open until the event *closes*, which is up to two days after the grind cutoff
+  depending on the server, so the row counts down to that. Ticking the row ticks every mission.
 - **Item exchange** — worth at least 500 easily-obtained crystals every event, and the deadline is
   8–10 days later than most people assume.
 - **Last virtual show** — the easiest thing to miss. Shows run as a roughly one-day burst, not for
@@ -67,8 +70,8 @@ For your current event on each selected server:
   limited-time exchange shops before they close.
 - **Event gacha** and every concurrent banner, folded away by default.
 - **Extras** — the monthly mission pass (buying it, finishing it, and a progress advisor), your
-  first three ranked matches of the season, the CN weekly badge exchange, and paid Connect Live
-  concerts.
+  first three ranked matches of the season, the CN weekly badge exchange, EN's weekly missions (a
+  folded checklist that resets every Monday at 04:00 Pacific time), and paid Connect Live concerts.
 
 Every row can be switched off in Settings, and presets set them in one click: **Show everything**,
 **Hide all gachas**, or **Free-to-play** (hides everything that needs real money). Presets combine,
@@ -104,7 +107,7 @@ from scratch rather than lightened, because the urgency colours stop working on 
 
 **Density.** *Compact* is the default and fits noticeably more within the same screen real estate;
 *Comfortable* is roomier if you prefer the space. Compact is not just tighter spacing — it drops
-the server-time line and folds the event sub-tasks into a single row of chips.
+the server-time line and shortens the virtual-show block.
 
 **Server time.** Shows each server's own local clock beside your own, which is useful for
 double-checking a deadline against what the game itself displays. **Requires Comfortable density** —
@@ -122,9 +125,9 @@ switch is greyed out, because sekai.best blocks its images from being shown on o
 date and time, which is handy for checking what a deadline will look like before it arrives.
 Nothing you tick while it is open is saved.
 
-**Data.** A refresh is a few hundred kilobytes. Gacha timing is the only large download, and it
-only happens when you ask, after a prompt telling you the exact current size. You can raise the
-threshold or turn the prompt off entirely.
+**Data.** A refresh is a few hundred kilobytes. Gacha timing and crystal amounts are the only large
+downloads, and each only happens when you ask, after a prompt telling you the exact current size.
+You can raise the threshold or turn the prompt off entirely.
 
 ## Reading the screen
 
@@ -154,6 +157,15 @@ section (exchange tickets count) and the banners that take free crystals move in
 folded list, with a short reminder about the hard pity before it opens. What stays in the main list
 is labelled "Free & paid-only gachas": the banners that never touch your free crystals.
 
+**Crystal badges.** Press **💎 Load crystal amounts** at the top of a column and each task shows what
+it is worth, straight from the game's own reward data: "💎 500" beside the item exchange, "💎 300"
+beside the virtual show, each bonus mission's own amount (the story mission counts the episodes'
+crystals too), the free track of the mission pass, and the ranked season's range. The final bonus
+mission reads "up to 100", since 100 crystals is one of the rewards you can pick. A badge greys out
+once you tick its row. The download is about 1.2 MB on EN, 1.4 MB on JP and 0.4 MB on CN, once; it is
+kept, and the button then shows its age so you can refresh it. You can switch the badges off in
+Settings.
+
 **Calendar.** Each deadline has a **+cal** link that opens a pre-filled Google Calendar entry you
 can edit before saving. **Export to calendar** at the bottom of a column puts several at once into
 one file for Google Calendar, Apple Calendar or Outlook. You pick the entries, rename them if you
@@ -171,9 +183,10 @@ because that is what your game client shows you. This is deliberate — matching
 point, and translating it would make cross-checking harder.
 
 **Data use is small, and it tells you before it isn't.** A full refresh is a few hundred kilobytes.
-Gacha timing is the only large download — about 2.8 MB on EN, 3.4 MB on JP, 322 KB on CN — and it
-only happens when you ask for it, after a prompt showing the exact current size. You can set the
-threshold, or turn the prompt off, in Settings.
+Gacha timing and crystal amounts are the only large downloads — gacha timing about 2.8 MB on EN,
+3.4 MB on JP, 322 KB on CN; crystal amounts about 1.2 MB, 1.4 MB and 0.4 MB — and each only happens
+when you ask for it, after a prompt showing the exact current size. You can set the threshold, or
+turn the prompt off, in Settings.
 
 **Everything stays on your device.** There is no account, no server, no analytics. Your settings
 and check-offs live in your browser's local storage, which also means they do not sync between
@@ -202,7 +215,6 @@ redistribute game data, and is enormously indebted to that project for keeping t
 
 - **TW and KR servers.** The mirrors exist and the code is ready for them; what is missing is
   verification against a live client, which needs someone who actually plays them.
-- **Crystal amounts per task**, so each row says what it is worth rather than only when it closes.
 - **Works offline once installed.** Cached deadline data already survives with no connection, but
   the page itself still needs one to load.
 - **More interface languages.** The groundwork is done — every string is already in one table, so
